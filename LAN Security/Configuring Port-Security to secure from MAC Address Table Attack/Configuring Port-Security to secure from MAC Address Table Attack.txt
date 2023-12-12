@@ -1,0 +1,44 @@
+####### On Cisco Switch #######
+[Step1]: To display the MAC Address table on Cisco Switch
+
+Switch#show mac address-table
+
+[Step2]: Shutdown all interfaces on the switch that are un-used.
+
+[Step3]: Configure "port-security" command on Cisco switch,
+
+SW(config)#interface ethernet 0/0
+SW(config-if)#switchport mode access
+SW(config-if)#switchport port-security
+SW(config-if)#switchport port-security maximum 1
+SW(config-if)#switchport port-security mac-address sticky
+SW(config-if)#switchport port-security violation shutdown ("protect", Secure[2]--> "restrict", More secure[1]--> "shutdown")
+
+[Step4]: To display the port-security details for Ethernet0/0
+
+SW#show port-security interface ethernet0/0
+
+Port Security              : Enabled <--
+Port Status                : Secure-up
+Violation Mode             : Shutdown <--
+Aging Time                 : 0 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 1 <--
+Total MAC Addresses        : 1
+Configured MAC Addresses   : 0
+Sticky MAC Addresses       : 0
+Last Source Address:Vlan   : aabb.cc00.1a10:1
+Security Violation Count   : 0
+
+[Step5]: Go to Kali Linux and check interface name (on Kali Linux)
+root@kali ~# ifconfig
+
+[Step6]: Command for Flooding MAC Address table (on Kali Linux)
+root@kali ~# macof -i eth0
+
+[Step7]: If a hacker attacks, Ethernet0/0 will be shut down.
+
+SW#show ip interface brief
+
+##################################
