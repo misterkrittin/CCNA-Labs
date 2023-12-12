@@ -1,5 +1,5 @@
 # 🧑‍Introduce myself
-Hello everyone. My name is Krittin Srithong with a short experience in the IT sector. I studied bachelor in Computer Enginnering from Thailand. You can visit my <a href="https://medium.com/techblogclub">Web blogs</a> as well as my <a href="https://github.com/misterkrittin/Scripts-MikroTik">GitHub</a>. I work as a freelance about communication network and I hold the following certificates: MTCNA, MTCUME, and MTCSE. Finally, I hope that my labs will be beneficial to you.
+Hello everyone. My name is Krittin Srithong, and I have a brief experience in the IT sector. I studied for a bachelor's degree in Computer Engineering in Thailand. You can visit my <a href="https://medium.com/techblogclub">Web blogs</a> as well as my <a href="https://github.com/misterkrittin/Scripts-MikroTik">GitHub</a>. I work as a freelance specializing in network implementation, and I hold the following certificates: MTCNA, MTCUME, and MTCSE. Finally, I hope that my labs will be beneficial to you.
 
 # ☎ Contact for work (In Thailand Only)
 ✉ swd.xpong@gmail.com
