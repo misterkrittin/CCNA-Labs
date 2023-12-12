@@ -1,0 +1,68 @@
+on R1,
+
+[Step1]: Configure Static WAN Address on "ethernet0/0" and enable this interface.
+####################################
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 10.254.4.70 255.255.255.0
+R1(config-if)#no shutdown
+R1(config-if)#exit
+####################################
+
+[Step2]: Create Default Route to reach the internet
+####################################
+R1(config)#ip route 0.0.0.0 0.0.0.0 10.254.4.254
+####################################
+
+[Step3]: Check if R1 can go to the internet.
+####################################
+R1(config)#do ping 8.8.8.8
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 8.8.8.8, timeout is 2 seconds:
+!!!!!
+####################################
+
+[Step4]: Configure LAN Gateway Address on ethernet0/1 and enable this interface.
+####################################
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+####################################
+
+[Step5]: Configure DHCP Server
+####################################
+R1(config)#ip dhcp excluded-address 192.168.12.1 192.168.12.10
+
+R1(config)#ip dhcp pool LAN
+R1(dhcp-config)#network 192.168.12.0 /24
+R1(dhcp-config)#default-router 192.168.12.1
+R1(dhcp-config)#dns-server 1.1.1.1 1.0.0.1
+R1(dhcp-config)#domain-name cisco.lab
+R1(dhcp-config)#exit
+####################################
+
+[Step6]: Create an access-list to classify the hosts that need to be natted
+####################################
+R1(config)#access-list 1 permit 192.168.12.0 0.0.0.255
+####################################
+
+[Step7]: Configure the NAT to have access list 1 as inside. ethernet0/0 as outside with overload
+####################################
+R1(config)#ip nat inside source list 1 interface ethernet0/0 overload
+####################################
+
+[Step8]: Apply the NAT on the inside and outside interfaces of R1
+####################################
+R1(config)#interface ethernet0/0
+R1(config-if)#ip nat outside 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+####################################
+
+On HostA and HostB,
+
+[Step1]: Check if HostA and HostB can both go to the internet.
