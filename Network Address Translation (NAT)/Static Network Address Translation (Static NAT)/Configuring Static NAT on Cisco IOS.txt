@@ -1,0 +1,87 @@
+on R1,
+
+[Step1]: Configure Static WAN Address on "ethernet0/1" and enable this interface.
+####################################
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown
+
+[Step2]: Configure LAN Gateway Address on "ethernet0/0" and enable this interface.
+####################################
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 200.0.0.1 255.0.0.0
+R1(config-if)#no shutdown
+
+on WebServer host,
+
+[Step3]: Configure LAN Address on Webserver host and enable this interface.
+####################################
+WebServer(config)#no ip routing 
+WebServer(config)#interface ethernet0/0
+WebServer(config-if)#ip address 192.168.12.254 255.255.255.0 
+WebServer(config-if)#no shutdown 
+WebServer(config-if)#exit
+WebServer(config)#ip default-gateway 192.168.12.1
+
+[Step4]: Enable Web Server service (For testing)
+####################################
+WebServer(config)#ip http server
+
+[Step5]: Check if 192.168.12.254 can reach to 192.168.12.1 (R1).
+####################################
+WebServer#ping 192.168.12.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/202/1007 ms
+
+on PC-Outside host,
+
+[Step6]: Configure Public IP Address on PC-Outside host and enable this interface.
+####################################
+PC-Outside(config)#no ip routing 
+PC-Outside(config)#interface ethernet0/0
+PC-Outside(config-if)#ip address 200.1.2.3 255.0.0.0
+PC-Outside(config-if)#no shutdown 
+PC-Outside(config-if)#exit
+PC-Outside(config)#ip default-gateway 200.0.0.1
+
+[Step7]: Check if 200.1.2.3 can reach to 200.0.0.1 (R1).
+####################################
+PC-Outside#ping 200.0.0.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.0.0.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+on R1,
+
+[Step8]: Create a Static NAT to translate the IP address 192.168.12.254 to 200.0.0.2 (one-to-one)
+####################################
+R1(config)#ip nat inside source static 192.168.12.254 200.0.0.2
+
+
+[Step9]: Apply the NAT on the inside and outside interfaces of R1
+####################################
+R1(config)#interface ethernet0/0
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1
+R1(config-if)#ip nat outside 
+R1(config-if)#exit 
+
+on PC-Outside host,
+
+[Step10]: Check if PC-Outside connect to the WebServer host via port 80
+####################################
+PC-Outside#telnet 200.0.0.2 80
+Trying 200.0.0.2, 80 ... Open
+
+or
+
+PC-Outside#ping 200.0.0.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.0.0.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
