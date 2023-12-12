@@ -1,0 +1,60 @@
+[Step1]: on R1, Configure LAN Gateway Address on ethernet0/0 and Configure DHCP Server.
+#################################
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#ip dhcp pool LAN
+R1(dhcp-config)#network 192.168.12.0 /24
+R1(dhcp-config)#dns-server 1.1.1.1 1.0.0.1
+R1(dhcp-config)#default-router 192.168.12.1
+R1(dhcp-config)#domain-name cisco.lab
+R1(dhcp-config)#exit
+
+
+#################################
+
+[Step2]: on SW, Enable DHCP Snooping function and assign trust port on ethernet0/0 and assign untrusted port (limit rate) on ethernet0/1-3.
+
+#################################
+SW(config)#ip dhcp snooping
+SW(config)#interface ethernet0/0
+SW(config-if)#ip dhcp snooping trust
+SW(config-if)#exit
+
+SW(config)#interface range ethernet0/1-3
+SW(config-if-range)#ip dhcp snooping limit rate 10
+SW(config-if-range)#end
+
+SW#show ip dhcp snooping
+
+Switch DHCP snooping is enabled
+DHCP snooping is configured on following VLANs:
+none
+DHCP snooping is operational on following VLANs:
+none
+DHCP snooping is configured on the following L3 Interfaces:
+
+Insertion of option 82 is enabled
+   circuit-id default format: vlan-mod-port
+   remote-id: aabb.cc00.2a00 (MAC)
+Option 82 on untrusted port is not allowed
+Verification of hwaddr field is enabled
+Verification of giaddr field is enabled
+DHCP snooping trust/rate is configured on the following Interfaces:
+
+Interface                  Trusted    Allow option    Rate limit (pps)
+-----------------------    -------    ------------    ----------------   
+Ethernet0/0                yes        yes             unlimited
+  Custom circuit-ids:
+Ethernet0/1                no         no              10        
+  Custom circuit-ids:
+Ethernet0/2                no         no              10        
+  Custom circuit-ids:
+Ethernet0/3                no         no              10        
+  Custom circuit-ids:
+
+#################################
+
+[Step3]: on PC1 & PC2, Enable DHCP Client on Network Interface Card (NIC)
