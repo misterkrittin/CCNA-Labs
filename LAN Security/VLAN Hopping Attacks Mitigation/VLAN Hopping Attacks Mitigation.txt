@@ -1,0 +1,379 @@
+On SW1,
+
+[Step1]: Create VLAN on SW1 and show all vlan that you created
+######################################################
+SW1(config)#vlan 10
+SW1(config-vlan)#name Sales
+SW1(config-vlan)#exit
+SW1(config)#vlan 20
+SW1(config-vlan)#name Marketing
+SW1(config-vlan)#exit
+
+SW1(config)#do show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/0, Et0/1, Et0/2, Et0/3
+                                                Et1/0, Et1/1, Et1/2, Et1/3
+                                                Et2/0, Et2/1, Et2/2, Et2/3
+                                                Et3/0, Et3/1, Et3/2, Et3/3
+10   Sales                            active    
+20   Marketing                        active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+          
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+          
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+######################################################
+
+[Step2]: Check Port Status
+######################################################
+SW1#show ip interface brief
+
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up      
+Ethernet0/1            unassigned      YES unset  up                    up      
+Ethernet0/2            unassigned      YES unset  up                    up      
+Ethernet0/3            unassigned      YES unset  up                    up      
+Ethernet1/0            unassigned      YES unset  up                    up      
+Ethernet1/1            unassigned      YES unset  up                    up      
+Ethernet1/2            unassigned      YES unset  up                    up      
+Ethernet1/3            unassigned      YES unset  up                    up      
+Ethernet2/0            unassigned      YES unset  up                    up      
+Ethernet2/1            unassigned      YES unset  up                    up      
+Ethernet2/2            unassigned      YES unset  up                    up      
+Ethernet2/3            unassigned      YES unset  up                    up      
+Ethernet3/0            unassigned      YES unset  up                    up      
+Ethernet3/1            unassigned      YES unset  up                    up      
+Ethernet3/2            unassigned      YES unset  up                    up      
+Ethernet3/3            unassigned      YES unset  up                    up
+######################################################
+
+[Step3]: Shutdown all interfaces on the switch that are un-used
+######################################################
+SW1(config)#interface range Ethernet0/2-3, Ethernet1/0-3, Ethernet2/0-3, Ethernet3/0-2
+SW1(config-if-range)#shutdown
+SW1(config-if-range)#exit
+
+SW1#show ip interface brief 
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up      
+Ethernet0/1            unassigned      YES unset  up                    up      
+Ethernet0/2            unassigned      YES unset  administratively down down    
+Ethernet0/3            unassigned      YES unset  administratively down down    
+Ethernet1/0            unassigned      YES unset  administratively down down    
+Ethernet1/1            unassigned      YES unset  administratively down down    
+Ethernet1/2            unassigned      YES unset  administratively down down    
+Ethernet1/3            unassigned      YES unset  administratively down down    
+Ethernet2/0            unassigned      YES unset  administratively down down    
+Ethernet2/1            unassigned      YES unset  administratively down down    
+Ethernet2/2            unassigned      YES unset  administratively down down    
+Ethernet2/3            unassigned      YES unset  administratively down down    
+Ethernet3/0            unassigned      YES unset  administratively down down    
+Ethernet3/1            unassigned      YES unset  administratively down down    
+Ethernet3/2            unassigned      YES unset  administratively down down    
+Ethernet3/3            unassigned      YES unset  up                    up
+######################################################
+
+[Step4]: Make ethernet0/0 as access port and show details this interface
+######################################################
+SW1(config)#interface ethernet0/0
+SW1(config-if)#switchport mode access
+SW1(config-if)#switchport access vlan 10
+SW1(config-if)#exit
+
+SW1#show interfaces ethernet0/0 switchport 
+ 
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: static access <-- # dynamic auto (Default) # -->
+Operational Mode: static access
+Administrative Trunking Encapsulation: negotiate
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: Off <--- # It must be "off" status # --> **
+Access Mode VLAN: 10 (Employee)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+          
+Protected: false
+Appliance trust: none
+######################################################
+
+[Step5]: Make ethernet0/1 as access port and show details this interface
+######################################################
+SW1(config)#interface ethernet0/1
+SW1(config-if)#switchport mode access
+SW1(config-if)#switchport access vlan 10
+
+SW1#show interfaces ethernet0/1 switchport
+ 
+Name: Et0/1
+Switchport: Enabled
+Administrative Mode: static access <-- # dynamic auto (Default) # -->
+Operational Mode: static access
+Administrative Trunking Encapsulation: negotiate
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: Off <--- # It must be "off" status # --> **
+Access Mode VLAN: 10 (Employee)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+          
+Protected: false
+Appliance trust: none
+######################################################
+
+[Step6]: Make ethernet0/1 as trunk port, Input "switchport nonegotiate" command and show details this interface
+######################################################
+SW1(config)#interface ethernet3/3
+SW1(config-if)#switchport trunk encapsulation dot1q 
+SW1(config-if)#switchport mode trunk
+SW1(config-if)#switchport trunk allowed vlan 10,20
+SW1(config-if)#switchport nonegotiate
+
+SW1#show interfaces ethernet3/3 switchport
+
+Name: Et3/3
+Switchport: Enabled
+Administrative Mode: trunk <-- # dynamic auto (Default) # -->
+Operational Mode: trunk
+Administrative Trunking Encapsulation: dot1q
+Operational Trunking Encapsulation: dot1q
+Negotiation of Trunking: Off <--- # It must be "off" status # --> **
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 10,20
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+          
+Protected: false
+Appliance trust: none
+######################################################
+
+
+
+On SW2,
+
+[Step1]: Create VLAN on SW2 and show all vlan that you created
+######################################################
+SW2(config)#vlan 10
+SW2(config-vlan)#name Sales
+SW2(config-vlan)#exit
+SW2(config)#vlan 20
+SW2(config-vlan)#name Marketing
+SW2(config-vlan)#exit
+SW2(config)#do show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/0, Et0/1, Et0/2, Et0/3
+                                                Et1/0, Et1/1, Et1/2, Et1/3
+                                                Et2/0, Et2/1, Et2/2, Et2/3
+                                                Et3/0, Et3/1, Et3/2, Et3/3
+10   Sales                            active    
+20   Marketing                        active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+          
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+          
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+######################################################
+
+[Step2]: Check Port Status
+######################################################
+SW2#show ip interface brief
+
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up      
+Ethernet0/1            unassigned      YES unset  up                    up      
+Ethernet0/2            unassigned      YES unset  up                    up      
+Ethernet0/3            unassigned      YES unset  up                    up      
+Ethernet1/0            unassigned      YES unset  up                    up      
+Ethernet1/1            unassigned      YES unset  up                    up      
+Ethernet1/2            unassigned      YES unset  up                    up      
+Ethernet1/3            unassigned      YES unset  up                    up      
+Ethernet2/0            unassigned      YES unset  up                    up      
+Ethernet2/1            unassigned      YES unset  up                    up      
+Ethernet2/2            unassigned      YES unset  up                    up      
+Ethernet2/3            unassigned      YES unset  up                    up      
+Ethernet3/0            unassigned      YES unset  up                    up      
+Ethernet3/1            unassigned      YES unset  up                    up      
+Ethernet3/2            unassigned      YES unset  up                    up      
+Ethernet3/3            unassigned      YES unset  up                    up
+######################################################
+
+[Step3]: Shutdown all interfaces on the switch that are un-used
+######################################################
+SW2(config)#interface range Ethernet0/1-3, Ethernet1/0-3, Ethernet2/0-3, Ethernet3/0-2
+SW2(config-if-range)#shutdown
+SW2(config-if-range)#exit
+
+SW2#show ip interface brief 
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up      
+Ethernet0/1            unassigned      YES unset  administratively down down
+Ethernet0/2            unassigned      YES unset  administratively down down    
+Ethernet0/3            unassigned      YES unset  administratively down down    
+Ethernet1/0            unassigned      YES unset  administratively down down    
+Ethernet1/1            unassigned      YES unset  administratively down down    
+Ethernet1/2            unassigned      YES unset  administratively down down    
+Ethernet1/3            unassigned      YES unset  administratively down down    
+Ethernet2/0            unassigned      YES unset  administratively down down    
+Ethernet2/1            unassigned      YES unset  administratively down down    
+Ethernet2/2            unassigned      YES unset  administratively down down    
+Ethernet2/3            unassigned      YES unset  administratively down down    
+Ethernet3/0            unassigned      YES unset  administratively down down    
+Ethernet3/1            unassigned      YES unset  administratively down down    
+Ethernet3/2            unassigned      YES unset  administratively down down    
+Ethernet3/3            unassigned      YES unset  up                    up
+######################################################
+
+[Step4]: Make ethernet0/0 as access port and show details this interface
+######################################################
+SW2(config)#interface ethernet0/0
+SW2(config-if)#switchport mode access
+SW2(config-if)#switchport access vlan 20
+SW2(config-if)#exit
+
+SW2#show interfaces ethernet0/0 switchport 
+
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: static access <-- # dynamic auto (Default) # -->
+Operational Mode: static access
+Administrative Trunking Encapsulation: negotiate
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: Off <--- # It should be "off" status # --> **
+Access Mode VLAN: 20 (Marketing)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+          
+Protected: false
+Appliance trust: none
+######################################################
+
+[Step5]: Make ethernet0/1 as trunk port, Input "switchport nonegotiate" command and show details this interface
+######################################################
+SW2(config)#interface ethernet3/3
+SW2(config-if)#switchport trunk encapsulation dot1q 
+SW2(config-if)#switchport mode trunk
+SW2(config-if)#switchport trunk allowed vlan 10,20
+SW2(config-if)#switchport nonegotiate
+
+SW2#show interfaces ethernet3/3 switchport 
+
+Name: Et3/3
+Switchport: Enabled
+Administrative Mode: trunk <-- # dynamic auto (Default) # -->
+Operational Mode: trunk
+Administrative Trunking Encapsulation: dot1q
+Operational Trunking Encapsulation: dot1q
+Negotiation of Trunking: Off <--- # It must be "off" status # --> **
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 10,20
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+          
+Protected: false
+Appliance trust: none
+######################################################
