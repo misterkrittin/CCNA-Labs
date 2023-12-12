@@ -1,0 +1,23 @@
+[Step1]: Shutdown all interfaces on the switch that are un-used
+
+[Step2]: ## Trunk Port ##
+interface GigabitEthernet0/24
+ description == BKK_SWC_02-to-BKK_SWC_01_Gig24 ==
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ switchport nonegotiate
+
+[Step3]: ## Access Port (End Device) ##
+interface GigabitEthernet0/1
+ description PC-Engineer
+ switchport mode access
+ switchport access vlan 10
+ switchport port-security
+ switchport port-security maximum 1
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+## Do not forget to configure DHCP Snooping ##
