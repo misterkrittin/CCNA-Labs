@@ -1,0 +1,162 @@
+on R1,
+
+[Step1]: Provide an IP address to R1 as 192.168.12.1/24 and Configure DHCP Server on R1
+==========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown
+
+R1(config)#ip dhcp excluded-address 192.168.12.1 192.168.12.10  <-- Reserved the IP address pool from 192.168.12.1 to 192.168.12.10
+R1(config)#ip dhcp pool LAN 				        <-- Create a DHCP pool
+R1(dhcp-config)#network 192.168.12.0 /24		        <-- Network number and mask
+R1(dhcp-config)#default-router 192.168.12.1		        <-- Default Routers
+R1(dhcp-config)#dns-server 1.1.1.1 1.0.0.1		        <-- DNS Servers
+R1(dhcp-config)#domain-name cisco.lab			        <-- Domain name
+R1(dhcp-config)#lease 1				                <-- Address lease time
+==========================================
+
+on R2,
+
+[Step2]: Make R2 as a DHCP Client on its interface ethernet0/0
+==========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address dhcp
+R2(config-if)#no shutdown
+==========================================
+
+[Step3]: Did it receive the IP Address?
+==========================================
+R2#show ip interface brief 
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                192.168.12.11   YES DHCP   up                    up      
+Ethernet0/1                unassigned      YES unset  administratively down down    
+Ethernet0/2                unassigned      YES unset  administratively down down    
+Ethernet0/3                unassigned      YES unset  administratively down down
+
+R2#show ip interface ethernet0/0
+
+Ethernet0/0 is up, line protocol is up
+  Internet address is 192.168.12.11/24   <-- ethernet0/0 has been assigned the IP address 192.168.12.11/24 via DHCP server.
+  Broadcast address is 255.255.255.255
+  Address determined by DHCP
+  MTU is 1500 bytes
+  Helper address is not set
+  Directed broadcast forwarding is disabled
+  Outgoing access list is not set
+  Inbound  access list is not set
+  Proxy ARP is enabled
+  Local Proxy ARP is disabled
+  Security level is default
+  Split horizon is enabled
+  ICMP redirects are always sent
+  ICMP unreachables are always sent
+  ICMP mask replies are never sent
+  IP fast switching is enabled
+  IP fast switching on the same interface is disabled
+  IP Flow switching is disabled
+  IP CEF switching is enabled
+  IP CEF switching turbo vector
+  IP multicast fast switching is enabled
+  IP multicast distributed fast switching is disabled
+  IP route-cache flags are Fast, CEF
+  Router Discovery is disabled
+  IP output packet accounting is disabled
+  IP access violation accounting is disabled
+  TCP/IP header compression is disabled
+  RTP/IP header compression is disabled
+  Policy routing is disabled
+  Network address translation is disabled
+  BGP Policy Mapping is disabled
+  Input features: MCI Check
+  IPv4 WCCP Redirect outbound is disabled
+  IPv4 WCCP Redirect inbound is disabled
+  IPv4 WCCP Redirect exclude is disabled
+==========================================
+
+[Step4]: Check what is the gateway and default route
+==========================================
+R2#show ip route
+
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is 192.168.12.1 to network 0.0.0.0
+
+S*    0.0.0.0/0 [254/0] via 192.168.12.1 			   <-- Default Route and Gateway
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Ethernet0/0
+L        192.168.12.11/32 is directly connected, Ethernet0/0
+==========================================
+
+[Step5]: Check what is DNS Primary, DNS Secondary and Domain name
+==========================================
+R2#show ip dns view
+
+DNS View default parameters:
+Logging is off
+DNS Resolver settings:
+  Domain lookup is enabled
+  Default domain name: cisco.lab 	<-- Domain name
+  Domain search list:
+  Lookup timeout: 3 seconds
+  Lookup retries: 2
+  Domain name-servers:
+    1.1.1.1				<-- DNS Primary
+    1.0.0.1				<-- DNS Secondary
+DNS Server settings:
+  Forwarding of queries is enabled
+  Forwarder timeout: 3 seconds
+  Forwarder retries: 2
+  Forwarder addresses:
+==========================================
+
+on R1,
+
+[Step7]: Check on R1 the DHCP IP binding
+==========================================
+R1#show ip dhcp binding
+
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/     Lease expiration        Type
+    Hardware address/
+    User name
+192.168.12.11       0063.6973.636f.2d61.    Dec 14 2023 08:56 AM    Automatic
+                    6162.622e.6363.3030.
+                    2e32.6130.302d.4574.
+                    302f.30
+==========================================
+
+[Step8]: Check on R1 the DHCP Statistics
+==========================================
+R1#show ip dhcp server statistics
+
+Memory usage         32643
+Address pools        1
+Database agents      0
+Automatic bindings   1
+Manual bindings      0
+Expired bindings     0
+Malformed messages   0
+Secure arp entries   0
+
+Message              Received
+BOOTREQUEST          0
+DHCPDISCOVER         1
+DHCPREQUEST          1
+DHCPDECLINE          0
+DHCPRELEASE          0
+DHCPINFORM           0
+
+Message              Sent
+BOOTREPLY            0
+DHCPOFFER            1
+DHCPACK              1
+DHCPNAK              0
+==========================================
