@@ -95,7 +95,7 @@ C        192.168.12.0/24 is directly connected, Ethernet0/0
 L        192.168.12.11/32 is directly connected, Ethernet0/0
 ==========================================
 
-[Step5]: Check what is DNS Primary, DNS Secondary and Domain name
+[Step5]: Check what is Primary DNS, Secondary DNS and Domain name
 ==========================================
 R2#show ip dns view
 
@@ -108,8 +108,8 @@ DNS Resolver settings:
   Lookup timeout: 3 seconds
   Lookup retries: 2
   Domain name-servers:
-    1.1.1.1				<-- DNS Primary
-    1.0.0.1				<-- DNS Secondary
+    1.1.1.1				<-- Primary DNS
+    1.0.0.1				<-- Secondary DNS
 DNS Server settings:
   Forwarding of queries is enabled
   Forwarder timeout: 3 seconds
