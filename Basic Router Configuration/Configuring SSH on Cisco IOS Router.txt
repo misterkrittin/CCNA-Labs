@@ -1,0 +1,80 @@
+On R1,
+
+[Step1]: Give a name to the Router as R1
+#############################################
+Router(config)#hostname R1
+#############################################
+
+[Step2]: Provide an IP address to R1 as 192.168.12.1/24
+#############################################
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+Router(config-if)#exit
+#############################################
+
+[Step3]: Configure a domain name for R1 as cisco.lab
+#############################################
+R1(config)#ip domain-name cisco.lab
+#############################################
+
+[Step4]: Generate the crypto key rsa and 1024 bits
+#############################################
+R1(config)#crypto key generate rsa
+
+The name for the keys will be: R1.cisco.lab
+Choose the size of the key modulus in the range of 360 to 4096 for your
+  General Purpose Keys. Choosing a key modulus greater than 512 may take
+  a few minutes.
+
+How many bits in the modulus [512]: 1024
+#############################################
+
+[Step5]: SSH version 1.99 by default
+#############################################
+R1#show ip ssh
+SSH Enabled - version 1.99
+#############################################
+
+[Step6]: Make SSH version 2
+#############################################
+R1(config)#ip ssh version 2
+#############################################
+
+[Step7]: Check if SSH is version 2
+#############################################
+R1(config)#do show ip ssh
+SSH Enabled - version 2.0
+#############################################
+
+[Step8]: Allow on VTY only SSH to work
+#############################################
+R1(config)#line vty 0 4
+R1(config-line)#transport input ssh
+R1(config-line)#login local
+R1(config-line)#exit
+#############################################
+
+[Step9]: Create a privilege 15 account to be loggin in as SSH to R1
+#############################################
+R1(config)#username admin privilege 15 secret 12345
+#############################################
+
+On PC,
+
+[Step1]: Provide an IP address to PC as 192.168.12.2/24
+#############################################
+PC(config)#no ip routing
+PC(config)#interface ethernet0/0
+PC(config-if)#ip address 192.168.12.2 255.255.255.0
+PC(config-if)#no shutdown 
+PC(config-if)#exit
+R1(config)#ip default-gateway 192.168.12.1
+#############################################
+
+[Step2]: Provide an IP address to PC as 192.168.12.2/24
+#############################################
+PC#ssh -l admin 192.168.12.1
+Password: 12345
+#############################################
+
