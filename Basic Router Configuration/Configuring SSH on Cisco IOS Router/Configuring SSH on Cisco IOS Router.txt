@@ -49,7 +49,7 @@ SSH Enabled - version 2.0
 
 [Step8]: Allow on VTY only SSH to work
 #############################################
-R1(config)#line vty 0 4
+R1(config)#line vty 0 4 <-- Supports up to 5 concurrent sessions
 R1(config-line)#transport input ssh
 R1(config-line)#login local
 R1(config-line)#exit
