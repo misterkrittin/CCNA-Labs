@@ -24,7 +24,7 @@ R2(config-if)#ip address dhcp
 R2(config-if)#no shutdown
 ==========================================
 
-[Step3]: Did it receive the IP Address?
+[Step3]: Did ethernet0/0 on receive the IP Address?
 ==========================================
 R2#show ip interface brief 
 Interface                  IP-Address      OK? Method Status                Protocol
@@ -89,7 +89,7 @@ Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
 
 Gateway of last resort is 192.168.12.1 to network 0.0.0.0
 
-S*    0.0.0.0/0 [254/0] via 192.168.12.1 			   <-- Default Route and Gateway
+S*    0.0.0.0/0 [254/0] via 192.168.12.1 			   <-- Default Route and Next hop gateway
       192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
 C        192.168.12.0/24 is directly connected, Ethernet0/0
 L        192.168.12.11/32 is directly connected, Ethernet0/0
