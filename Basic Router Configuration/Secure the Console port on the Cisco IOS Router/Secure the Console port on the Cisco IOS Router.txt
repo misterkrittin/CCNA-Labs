@@ -1,0 +1,22 @@
+## [Type 1: Username & Password] ##
+
+on R1,
+
+R1(config)#username admin privilege 15 secret 12345  <-- Create a privilege 15 account to be logging in as Console to R1
+
+R1(config)#line console 0 <-- Configure console port
+R1(config-line)#login local <-- Apply username and password that you created on Console
+R1(config-line)#exit
+
+##################################
+
+## [Type 2: Only Password] ##
+
+on R1,
+
+R1(config)#line console 0 <-- Configure console port
+R1(config-line)#password 123456 <-- Set password when user plug console port.
+R1(config-line)#login <-- Apply password that you set
+R1(config-line)#exit
+
+##################################
