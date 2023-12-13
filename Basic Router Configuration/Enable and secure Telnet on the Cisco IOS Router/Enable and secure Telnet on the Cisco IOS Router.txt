@@ -1,0 +1,68 @@
+## [Type 1: Username & Password] ##
+
+on R1,
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown
+
+R1(config)#username admin privilege 15 secret 12345  <-- Create a privilege 15 account to be logging in as Console to R1
+
+R1(config)#line vty 0 4                 <-- Supports up to 5 concurrent sessions.
+R1(config-line)#transport input telnet    <-- Set which protocols are allowed to access the virtual terminal lines
+R1(config-line)#login local             <-- Apply username and password that you created on Console
+R1(config-line)#exit
+
+on PC,
+
+PC(config)#no ip routing 
+PC(config)#interface ethernet0/0
+PC(config-if)#ip address 192.168.12.2 255.255.255.0
+PC(config-if)#no shutdown 
+PC(config-if)#exit
+
+PC#telnet 192.168.12.1
+Trying 192.168.12.1 ... Open
+
+
+User Access Verification
+
+Username: admin
+Password: 12345
+##################################
+
+## [Type 2: Only Password] ##
+
+on R1,
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown
+
+R1(config)#line vty 0 4                 <-- Supports up to 5 concurrent sessions.
+R1(config-line)#transport input telnet  <-- Set which protocols are allowed to access the virtual terminal lines
+R1(config-line)#password 123456		<-- Set password when user telnet to R1
+R1(config-line)#login                   <-- Apply username and password that you created on Console
+R1(config-line)#exit
+
+R1(config)#enable secret 0000000000         <-- Setting the password before entering Privileged EXEC Mode.
+
+on PC,
+
+PC(config)#no ip routing 
+PC(config)#interface ethernet0/0
+PC(config-if)#ip address 192.168.12.2 255.255.255.0
+PC(config-if)#no shutdown 
+PC(config-if)#exit
+
+PC#telnet 192.168.12.1
+Trying 192.168.12.1 ... Open
+
+
+User Access Verification
+
+Password: 123456
+
+R1>enable
+Password: 0000000000
+##################################
