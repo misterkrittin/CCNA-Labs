@@ -1,0 +1,117 @@
+[Step1]: Provide an IP address to R1 as 192.168.12.1/24 and create loopback0 provide an IP address as 10.10.10.1/24
+====================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown
+R1(config-if)#exit
+
+R1(config)#interface loopback 0
+R1(config-if)#ip address 10.10.10.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+====================================
+
+[Step2]: Provide an IP address to R2 as 192.168.12.2/24 and create loopback0 provide an IP address as 172.16.0.1/24
+====================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#interface loopback 0
+R2(config-if)#ip address 172.16.0.1 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+====================================
+
+[Step3]: Check if R1 can connect to R2 and R2 can connect to R1
+====================================
+R1#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+R2#ping 192.168.12.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+====================================
+
+[Step4]: Create a static route on R1 to access only the network 172.16.0.0/24
+====================================
+R1(config)#ip route 172.16.0.0 255.255.255.0 192.168.12.2
+
+R1#show ip route
+
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        10.10.10.0/24 is directly connected, Loopback0
+L        10.10.10.1/32 is directly connected, Loopback0
+      172.16.0.0/24 is subnetted, 1 subnets
+S        172.16.0.0 [1/0] via 192.168.12.2			 <-- Static Route (S)
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Ethernet0/0
+L        192.168.12.1/32 is directly connected, Ethernet0/0
+====================================
+
+[Step5]: Create a default route on R2 to access every network
+====================================
+R2(config)#ip route 0.0.0.0 0.0.0.0 192.168.12.1
+
+R2#show ip route
+
+*Dec 13 08:31:14.117: %SYS-5-CONFIG_I: Configured from console by console
+R2#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is 192.168.12.1 to network 0.0.0.0
+
+S*    0.0.0.0/0 [1/0] via 192.168.12.1			        <-- Default Route (S*)			      
+      172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C        172.16.0.0/24 is directly connected, Loopback0
+L        172.16.0.1/32 is directly connected, Loopback0
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Ethernet0/0
+L        192.168.12.2/32 is directly connected, Ethernet0/0
+====================================
+
+[Step6]: Check if IP Address of loopback0 on R1 can connect to IP Address of loopback0 on R2
+====================================
+R1#ping 172.16.0.1 source 10.10.10.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.16.0.1, timeout is 2 seconds:
+Packet sent with a source address of 10.10.10.1 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+====================================
+
+[Step7]: Check if IP Address of loopback0 on R2 can connect to IP Address of loopback0 on R1
+====================================
+R2#ping 10.10.10.1 source 172.16.0.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.10.10.1, timeout is 2 seconds:
+Packet sent with a source address of 172.16.0.1 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+====================================
