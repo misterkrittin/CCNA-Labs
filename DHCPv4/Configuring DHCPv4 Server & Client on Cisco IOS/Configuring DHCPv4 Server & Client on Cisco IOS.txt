@@ -119,7 +119,7 @@ DNS Server settings:
 
 on R1,
 
-[Step7]: Check on R1 the DHCP IP binding
+[Step6]: Check on R1 the DHCP IP binding
 ==========================================
 R1#show ip dhcp binding
 
@@ -133,7 +133,7 @@ IP address          Client-ID/     Lease expiration        Type
                     302f.30
 ==========================================
 
-[Step8]: Check on R1 the DHCP Statistics
+[Step7]: Check on R1 the DHCP Statistics
 ==========================================
 R1#show ip dhcp server statistics
 
