@@ -1,0 +1,164 @@
+on R1,
+
+[Step1]: LLDP is disabled by default on the device.
+##########################################
+R1#show lldp 
+% LLDP is not enabled
+##########################################
+
+[Step2]: Enable LLDP globally on the R1
+##########################################
+R1(config)#lldp run
+
+R1#show lldp 
+
+Global LLDP Information:
+    Status: ACTIVE
+    LLDP advertisements are sent every 30 seconds
+    LLDP hold time advertised is 120 seconds
+    LLDP interface reinitialisation delay is 2 seconds
+##########################################
+
+[Step3]: Enable lldp transmit and receive on interface ethernet0/0 and ethernet0/1
+##########################################
+R1(config)#interface range ethernet0/0-1
+R1(config-if-range)#no shutdown
+R1(config-if-range)#lldp transmit 
+R1(config-if-range)#lldp receive
+R1(config-if-range)#exit
+##########################################
+
+on R2,
+
+[Step4]: Enable LLDP globally on the R2 and Enable lldp transmit and receive on interface ethernet0/0
+##########################################
+R2(config)#lldp run
+R2(config)#interface ethernet0/0
+R2(config-if)#no shutdown 
+R2(config-if)#lldp transmit
+R2(config-if)#lldp receive
+R2(config-if)#exit
+##########################################
+
+on R3,
+
+[Step5]: Enable LLDP globally on the R3 and Enable lldp transmit and receive on interface ethernet0/0
+##########################################
+R3(config)#lldp run
+R3(config)#interface ethernet0/0
+R3(config-if)#no shutdown 
+R3(config-if)#lldp transmit
+R3(config-if)#lldp receive
+R3(config-if)#exit
+##########################################
+
+
+>>>>> Testing <<<<<
+
+on R1,
+
+[Step6]: Check the list of LLDP neighbors
+##########################################
+R1#show lldp neighbors
+
+Capability codes:
+    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+
+Device ID           Local Intf     Hold-time  Capability      Port ID
+R3                  Et0/1          120        R               Et0/0
+R2                  Et0/0          120        R               Et0/0
+
+Total entries displayed: 2
+##########################################
+
+[Step7]: Display more details about LLDP neighbors
+##########################################
+R1#show lldp neighbors detail
+------------------------------------------------
+Local Intf: Et0/1
+Chassis id: aabb.cc00.3a00
+Port id: Et0/0
+Port Description: Ethernet0/0
+System Name: R3
+
+System Description: 
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.7(3)M2, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2018 by Cisco Systems, Inc.
+Compiled Wed 28-Mar-18 11:18 by prod_rel_te
+
+Time remaining: 90 seconds
+System Capabilities: B,R
+Enabled Capabilities: R
+Management Addresses - not advertised
+Auto Negotiation - not supported
+Physical media capabilities - not advertised
+Media Attachment Unit type - not advertised
+Vlan ID: - not advertised
+
+------------------------------------------------
+Local Intf: Et0/0
+Chassis id: aabb.cc00.2a00
+Port id: Et0/0
+Port Description: Ethernet0/0
+System Name: R2
+          
+System Description: 
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.7(3)M2, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2018 by Cisco Systems, Inc.
+Compiled Wed 28-Mar-18 11:18 by prod_rel_te
+          
+Time remaining: 98 seconds
+System Capabilities: B,R
+Enabled Capabilities: R
+Management Addresses - not advertised
+Auto Negotiation - not supported
+Physical media capabilities - not advertised
+Media Attachment Unit type - not advertised
+Vlan ID: - not advertised
+          
+          
+Total entries displayed: 2
+##########################################
+
+[Step8]: Check LLDP on all interfaces
+##########################################
+R1#show lldp interface 
+
+Ethernet0/0:
+    Tx: enabled
+    Rx: enabled
+    Tx state: IDLE
+    Rx state: WAIT FOR FRAME
+
+Ethernet0/1:
+    Tx: enabled
+    Rx: enabled
+    Tx state: IDLE
+    Rx state: WAIT FOR FRAME
+
+Ethernet0/2:
+    Tx: enabled
+    Rx: enabled
+    Tx state: INIT
+    Rx state: WAIT PORT OPER
+
+Ethernet0/3:
+    Tx: enabled
+    Rx: enabled
+    Tx state: INIT
+    Rx state: WAIT PORT OPER
+##########################################
+
+[Step9]: Check LLDP on ethernet0/0
+##########################################
+R1#show lldp interface ethernet0/0
+
+Ethernet0/0:
+    Tx: enabled
+    Rx: enabled
+    Tx state: IDLE
+    Rx state: WAIT FOR FRAME
+##########################################
