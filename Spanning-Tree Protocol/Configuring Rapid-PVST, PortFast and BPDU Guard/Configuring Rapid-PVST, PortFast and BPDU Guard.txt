@@ -1,0 +1,131 @@
+[Step1]: Login to SW1, SW2, SW3 and make the protocol mode RSTP
+====================================
+on SW1,
+SW1(config)#spanning-tree mode rapid-pvst
+
+on SW2,
+SW2(config)#spanning-tree mode rapid-pvst
+
+on SW3,
+SW3(config)#spanning-tree mode rapid-pvst
+
+====================================
+
+[Step2]: Check which of the Switch is the root bridge for VLAN 1
+====================================
+SW1#show spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol rstp					<-- Rapid-PVST mode
+  Root ID    Priority    32769
+             Address     aabb.cc00.1a00
+             This bridge is the root					<-- SW1 is the root bridge for VLAN1
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.1a00
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr 
+Et0/1               Desg FWD 100       128.2    Shr 
+Et0/2               Desg FWD 100       128.3    Shr 
+Et0/3               Desg FWD 100       128.4    Shr
+
+
+SW2#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp					<-- Rapid-PVST mode
+  Root ID    Priority    32769
+             Address     aabb.cc00.1a00
+             Cost        100
+             Port        1 (Ethernet0/0)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.2a00
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Root FWD 100       128.1    Shr 
+Et0/1               Desg FWD 100       128.2    Shr 
+Et0/2               Desg FWD 100       128.3    Shr 
+Et0/3               Desg FWD 100       128.4    Shr 
+
+
+SW3#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp					<-- Rapid-PVST mode
+  Root ID    Priority    32769
+             Address     aabb.cc00.1a00
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3a00
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr 
+Et0/1               Root FWD 100       128.2    Shr 
+Et0/2               Altn BLK 100       128.3    Shr 
+Et0/3               Desg FWD 100       128.4    Shr
+====================================
+
+
+[Step3]: Make the change so SW2 is the root bridge for VLAN1
+====================================
+SW2(config)#spanning-tree vlan 1 priority 28672 <-- (A lower priority value will be considered as the Root bridge.)
+
+OR
+
+SW2(config)#spanning-tree vlan 1 root primary
+====================================
+
+[Step4]: Check if SW2 is the root bridge for VLAN1
+====================================
+SW2#show spanning-tree vlan 1
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    28673
+             Address     aabb.cc00.2a00
+             This bridge is the root					<-- SW2 is the root bridge for VLAN1
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    28673  (priority 28672 sys-id-ext 1)
+             Address     aabb.cc00.2a00
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr 
+Et0/1               Desg FWD 100       128.2    Shr 
+Et0/2               Desg FWD 100       128.3    Shr 
+Et0/3               Desg FWD 100       128.4    Shr 
+====================================
+
+[Step5]: Make the ports that are connected to the PCs as Edge ports (Portfast) and prevent other switches, which are not PCs, from connecting to this interface using BPDU Guard.
+====================================
+SW2(config)#interface ethernet0/1
+SW2(config-if)#switchport mode access
+SW2(config-if)#spanning-tree portfast
+SW2(config-if)#spanning-tree bpduguard enable
+
+AND
+
+SW3(config)#interface ethernet0/0
+SW3(config-if)#switchport mode access 
+SW3(config-if)#spanning-tree portfast
+SW3(config-if)#spanning-tree bpduguard enable
+====================================
