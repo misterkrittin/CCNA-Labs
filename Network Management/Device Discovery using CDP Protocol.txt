@@ -1,0 +1,196 @@
+on R1,
+
+[Step1]: CDP is enabled by default on the device.
+##########################################
+R1#show cdp
+
+Global CDP information:
+Sending CDP packets every 60 seconds
+Sending a holdtime value of 180 seconds
+Sending CDPv2 advertisements is  enabled
+##########################################
+
+[Step2]: Disables the CDP feature on the device. (If you do not have a necessity to use CDP, I recommend disabling it for security reasons.)
+##########################################
+
+R1(config)#no cdp run
+##########################################
+
+[Step3]: Enables the CDP feature on the device.
+##########################################
+
+R1(config)#cdp run
+##########################################
+
+[Step4]: When CDP is enabled, you can disable CDP on each interface. (If you do have a necessity to use CDP, I recommend disabling it on unreliable interfaces for security reasons.)
+##########################################
+
+R1(config)#interface ethernet0/1     
+R1(config-if)#ip address 10.254.4.70 255.255.255.0
+R1(config-if)#no shutdown
+R1(config-if)#no cdp enable
+R1(config-if)#exit
+##########################################
+
+[Step5]: Check CDP on all interfaces. (ethernet0/1 will not be displayed as CDP is disabled.)
+##########################################
+R1#show cdp interface
+
+Ethernet0/0 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/2 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/3 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+
+ cdp enabled interfaces : 3
+ interfaces up          : 0
+ interfaces down        : 3
+
+[Step6]: Check the CDP status on ethernet0/1
+##########################################
+R1#show cdp interface ethernet0/1
+
+ CDP is not enabled on interface Ethernet0/1
+##########################################
+
+[Step7]: Enable the interface ethernet0/0 on R1
+##########################################
+R1(config)#interface ethernet0/0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1#show cdp interface
+
+Ethernet0/0 is up, line protocol is up 		<-- CDP on ethernet0/0 is up.
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/2 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/3 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+
+ cdp enabled interfaces : 3
+ interfaces up          : 1	<--
+ interfaces down        : 2
+##########################################
+
+on R2,
+[Step8]: Enable the interface ethernet0/0 on R2
+##########################################
+R2(config)#interface ethernet0/0
+R2(config-if)#no shutdown
+R2(config-if)#exit
+
+R2#show cdp interface
+ 
+Ethernet0/0 is up, line protocol is up		<-- CDP on ethernet0/0 is up.
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/1 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/2 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+Ethernet0/3 is administratively down, line protocol is down
+  Encapsulation ARPA
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+
+ cdp enabled interfaces : 4
+ interfaces up          : 1
+ interfaces down        : 3
+##########################################
+
+
+>>>>> Testing <<<<<
+
+
+[Step9]: Check the list of CDP neighbors on R1
+##########################################
+R1#show cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+R2               Eth 0/0           154              R B   Linux Uni Eth 0/0
+
+Total cdp entries displayed : 1
+##########################################
+
+[Step10]: Display more detail about CDP neighbors on R1
+##########################################
+R1#show cdp neighbors detail 
+-------------------------
+Device ID: R2 		<--
+Entry address(es): 
+Platform: Linux Unix,  Capabilities: Router Source-Route-Bridge 
+Interface: Ethernet0/0,  Port ID (outgoing port): Ethernet0/0
+Holdtime : 136 sec
+
+Version : <--
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.7(3)M2, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2018 by Cisco Systems, Inc.
+Compiled Wed 28-Mar-18 11:18 by prod_rel_team
+
+advertisement version: 2
+
+
+Total cdp entries displayed : 1
+##########################################
+
+[Step11]: Check the list of CDP neighbors on R2
+##########################################
+R2#show cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+R1               Eth 0/0           157              R B   Linux Uni Eth 0/0
+
+Total cdp entries displayed : 1
+##########################################
+
+[Step12]: Display more detail about CDP neighbors on R2
+##########################################
+R2#show cdp neighbors detail
+-------------------------
+Device ID: R1		<--
+Entry address(es): 
+  IP address: 10.254.4.70
+Platform: Linux Unix,  Capabilities: Router Source-Route-Bridge 
+Interface: Ethernet0/0,  Port ID (outgoing port): Ethernet0/0
+Holdtime : 124 sec
+
+Version : <--
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.7(3)M2, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2018 by Cisco Systems, Inc.
+Compiled Wed 28-Mar-18 11:18 by prod_rel_team
+
+advertisement version: 2
+Management address(es): 
+  IP address: 10.254.4.70
+
+
+Total cdp entries displayed : 1
+##########################################
+
