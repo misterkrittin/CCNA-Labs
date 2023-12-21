@@ -1,0 +1,165 @@
+[Step1]: Configure EtherChannel (LACP) on gigabitEthernet0/0 and gigabitEthernet0/1 on SW1 (hint: disable switching)
+================================
+SW1(config)#interface range gigabitEthernet0/0-1
+SW1(config-if-range)#no switchport 
+SW1(config-if-range)#no shutdown
+
+SW1(config-if-range)#channel-group 1 mode active 
+Creating a port-channel interface Port-channel 1
+SW1(config-if-range)#exit
+
+[Step2]: Configure EtherChannel (LACP) on gigabitEthernet0/0 and gigabitEthernet0/1 on SW2 (hint: disable switching)
+================================
+SW2(config)#interface range gigabitEthernet0/0-1
+SW2(config-if-range)#no switchport
+SW2(config-if-range)#no shutdown
+
+SW2(config-if-range)#channel-group 1 mode active 
+Creating a port-channel interface Port-channel 1
+SW2(config-if-range)#exit
+
+[Step3]: Check if the L3 EtherChannel has been formed on SW1
+================================
+SW1#show etherchannel summary 
+Flags:  D - down        P - bundled in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      N - not in use, no aggregation
+        f - failed to allocate aggregator
+
+        M - not in use, minimum links not met
+        m - not in use, port not aggregated due to minimum links not met
+        u - unsuitable for bundling
+        w - waiting to be aggregated
+        d - default port
+
+        A - formed by Auto LAG
+
+
+Number of channel-groups in use: 1
+Number of aggregators:           1
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+-----------------------------------------------
+1      Po1(RU)         LACP      Gi0/0(P)    Gi0/1(P)		<-- ("RU" means R - Layer3, U - in use)
+
+
+[Step4]: Check if the L3 EtherChannel has been formed on SW2
+================================
+SW2#show etherchannel summary 
+Flags:  D - down        P - bundled in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      N - not in use, no aggregation
+        f - failed to allocate aggregator
+
+        M - not in use, minimum links not met
+        m - not in use, port not aggregated due to minimum links not met
+        u - unsuitable for bundling
+        w - waiting to be aggregated
+        d - default port
+
+        A - formed by Auto LAG
+
+
+Number of channel-groups in use: 1
+Number of aggregators:           1
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+-----------------------------------------------
+1      Po1(RU)         LACP      Gi0/0(P)    Gi0/1(P)		<-- ("RU" means R - Layer3, U - in use)
+
+
+[Step5]: Put the IP address on Port-channel1 on SW1 of 192.168.12.1/24
+================================
+SW1(config)#interface port-channel 1
+SW1(config-if)#ip address 192.168.12.1 255.255.255.0
+SW1(config-if)#no shutdown 
+SW1(config-if)#exit
+
+SW1#show ip interface brief 
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0     unassigned      YES manual up                    up      
+GigabitEthernet0/1     unassigned      YES manual up                    up      
+GigabitEthernet0/2     unassigned      YES unset  up                    up      
+GigabitEthernet0/3     unassigned      YES unset  up                    up      
+GigabitEthernet1/0     unassigned      YES unset  up                    up      
+GigabitEthernet1/1     unassigned      YES unset  up                    up      
+GigabitEthernet1/2     unassigned      YES unset  up                    up      
+GigabitEthernet1/3     unassigned      YES unset  up                    up      
+Port-channel1          192.168.12.1    YES manual up                    up	<-- Check if 192.168.12.1/24 has been configured on Port-channel1
+
+[Step6]: Put the IP address on Port-channel1 on SW2 of 192.168.12.2/24
+================================
+SW2(config)#interface port-channel1
+SW2(config-if)#ip address 192.168.12.2 255.255.255.0
+SW2(config-if)#no shutdown 
+SW2(config-if)#exit
+
+SW2#show ip interface brief 
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0     unassigned      YES manual up                    up      
+GigabitEthernet0/1     unassigned      YES manual up                    up      
+GigabitEthernet0/2     unassigned      YES unset  up                    up      
+GigabitEthernet0/3     unassigned      YES unset  up                    up      
+GigabitEthernet1/0     unassigned      YES unset  up                    up      
+GigabitEthernet1/1     unassigned      YES unset  up                    up      
+GigabitEthernet1/2     unassigned      YES unset  up                    up      
+GigabitEthernet1/3     unassigned      YES unset  up                    up      
+Port-channel1          192.168.12.2    YES manual up                    up	<-- Check if 192.168.12.2/24 has been configured on Port-channel1
+================================
+
+>>>>> Testing <<<<<
+[Step7]: Ping from SW1 to SW2 and SW2 to SW1
+================================
+SW1#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/4/7 ms
+
+SW2#ping 192.168.12.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/4/6 ms
+================================
+
+[Step8]: Check the routing on SW1 & SW2
+================================
+SW1#show ip route 
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is not set
+
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Port-channel1		<--
+L        192.168.12.1/32 is directly connected, Port-channel1
+
+SW2#show ip route 
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is not set
+
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Port-channel1		<--
+L        192.168.12.2/32 is directly connected, Port-channel1
+================================
