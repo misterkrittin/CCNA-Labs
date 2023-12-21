@@ -1,0 +1,138 @@
+on L3-Switch,
+[Step1]: Enable the Routing process on the Switch using IP routing command
+========================
+L3-Switch#show ip route 
+Default gateway is not set
+
+Host               Gateway           Last Use    Total Uses  Interface
+ICMP redirect cache is empty
+
+L3-Switch(config)#ip routing
+========================
+
+[Step2]: Create VLAN10 and VLAN20
+========================
+L3-Switch(config)#vlan 10
+L3-Switch(config-vlan)#name Sales
+L3-Switch(config-vlan)#exit
+L3-Switch(config)#vlan 20
+L3-Switch(config-vlan)#name Engineer
+L3-Switch(config-vlan)#exit
+
+[Step3]: Create interface VLAN10 and put an IP address on it of 192.168.12.1
+========================
+L3-Switch(config)#interface vlan 10
+L3-Switch(config-if)#ip address 192.168.12.1 255.255.255.0
+L3-Switch(config-if)#no shutdown
+L3-Switch(config-if)#exit
+
+[Step4]: Create interface VLAN20 and put an IP address on it of 192.168.21.1
+========================
+L3-Switch(config)#interface vlan 20
+L3-Switch(config-if)#ip address 192.168.21.1 255.255.255.0
+L3-Switch(config-if)#no shutdown
+L3-Switch(config-if)#exit
+
+[Step5]: Put gigabitEthernet0/0 in VLAN 10
+========================
+L3-Switch(config)#interface gigabitEthernet0/0
+L3-Switch(config-if)#switchport mode access
+L3-Switch(config-if)#switchport access vlan 10 
+L3-Switch(config-if)#no shutdown 
+L3-Switch(config-if)#exit
+
+[Step6]: Put gigabitEthernet0/1 in VLAN 20
+========================
+L3-Switch(config)#interface gigabitEthernet0/1
+L3-Switch(config-if)#switchport mode access  
+L3-Switch(config-if)#switchport access vlan 20
+L3-Switch(config-if)#no shutdown 
+L3-Switch(config-if)#exit
+========================
+
+[Step7]: Check the routing on L3-Switch
+========================
+L3-Switch#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is not set
+
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Vlan10		<--
+L        192.168.12.1/32 is directly connected, Vlan10
+      192.168.21.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.21.0/24 is directly connected, Vlan20		<--
+L        192.168.21.1/32 is directly connected, Vlan20
+========================
+
+on R1,
+[Step8]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on R1, and try to ping the gateway.
+========================
+R1(config)#no ip routing 
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.254 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit   
+
+R1(config)#ip default-gateway 192.168.12.1
+
+R1#ping 192.168.12.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/203/1008 ms
+
+on R2,
+[Step9]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on R2, and try to ping the gateway.
+========================
+R2(config)#no ip routing
+
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.21.254 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#ip default-gateway 192.168.21.1
+
+R2#ping 192.168.21.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.21.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/203/1009 ms
+========================
+
+
+>>>>> Testing <<<<<
+[Step10]: R1 pings R2 and the IP gateway of VLAN20. R2 pings R1 and the IP gateway of VLAN10.
+========================
+R1#ping 192.168.21.254
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.21.254, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms
+R1#ping 192.168.21.1  
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.21.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/3 ms
+
+R2#ping 192.168.12.254
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.254, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/3/5 ms
+R2#ping 192.168.12.1  
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/2/3 ms
+========================
