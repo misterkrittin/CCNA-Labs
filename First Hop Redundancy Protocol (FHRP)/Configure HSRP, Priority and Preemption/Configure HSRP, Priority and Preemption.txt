@@ -1,0 +1,144 @@
+on R1,
+
+[Step1]: Configure R1 to connect to the Internet
+=====================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.0.12 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#ip route 0.0.0.0 0.0.0.0 192.168.0.1
+
+R1#ping 8.8.8.8
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 8.8.8.8, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 23/23/23 ms
+=====================================
+
+[Step2]: Configure R2 to connect to the Internet
+=====================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.0.21 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#ip route 0.0.0.0 0.0.0.0 192.168.0.1
+
+R2#ping 1.1.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/2/3 ms
+=====================================
+
+[Step3]: Configure HSRP and Preemption (Set to Standby)
+=====================================
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 172.16.0.1 255.255.255.0
+R1(config-if)#no shutdown 
+
+R1(config-if)#standby 1 ip 172.16.0.254
+R1(config-if)#standby 1 preempt
+=====================================
+
+[Step4]: Configure HSRP, Priority and Preemption (Set to Active)
+=====================================
+R2(config)#interface ethernet0/1
+R2(config-if)#ip address 172.16.0.2 255.255.255.0
+R2(config-if)#no shutdown
+
+R2(config-if)#standby 1 ip 172.16.0.254
+R2(config-if)#standby 1 priority 150	<-- The router with the second-highest priority value becomes the standby router. The priority value can range from 0 to 255, with 100 as the default value.
+R2(config-if)#standby 1 preempt
+=====================================
+
+[Step5]: To view the HSRP information on R1
+=====================================
+R1#show standby 
+Ethernet0/1 - Group 1
+  State is Standby							<-- R1 is Standy
+    4 state changes, last state change 00:02:48
+  Virtual IP address is 172.16.0.254					<-- IP Address Virtual Router
+  Active virtual MAC address is 0000.0c07.ac01
+    Local virtual MAC address is 0000.0c07.ac01 (v1 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 2.448 secs
+  Preemption enabled							<-- HSRP preemption is a feature that enables a standby router with a higher priority to become the active router in an HSRP group. By default, when the active router goes down, the standby router with the highest priority takes over as the active router.
+  Active router is 172.16.0.2, priority 150 (expires in 9.072 sec)
+  Standby router is local
+  Priority 100 (default 100)						<-- 100 as the default priority value
+  Group name is "hsrp-Et0/1-1" (default)
+=====================================
+
+[Step6]: To view the HSRP information on R2
+=====================================
+R2#show standby 
+Ethernet0/1 - Group 1
+  State is Active							<-- R2 is Active
+    2 state changes, last state change 00:03:25
+  Virtual IP address is 172.16.0.254					<-- IP Address Virtual Router
+  Active virtual MAC address is 0000.0c07.ac01
+    Local virtual MAC address is 0000.0c07.ac01 (v1 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 0.736 secs
+  Preemption enabled							<-- HSRP preemption is a feature that enables a standby router with a higher priority to become the active router in an HSRP group. By default, when the active router goes down, the standby router with the highest priority takes over as the active router.
+  Active router is local
+  Standby router is 172.16.0.1, priority 100 (expires in 9.136 sec)
+  Priority 150 (configured 150)						<-- Set the priority value to 150 to make R2 become Active.
+  Group name is "hsrp-Et0/1-1" (default)
+=====================================
+
+[Step7]: Configure PAT on R1 to allow the Host PC to access the Internet.
+=====================================
+R1(config)#access-list 1 permit 172.16.0.0 /24
+R1(config)#ip nat inside source list 1 interface ethernet0/0 overload 
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip nat outside 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1 
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+=====================================
+
+[Step8]: Configure PAT on R2 to allow the Host PC to access the Internet.
+=====================================
+R2(config)#access-list 1 permit 172.16.0.0 /24 
+R2(config)#ip nat inside source list 1 interface ethernet0/0 overload 
+
+R2(config)#interface ethernet0/0
+R2(config-if)#ip nat outside 
+R2(config-if)#exit
+
+R2(config)#interface ether0/1
+R2(config-if)#ip nat inside 
+R2(config-if)#exit
+=====================================
+
+on PC,
+[Step9]: Disable the routing table, configure the IP address, and set the virtual gateway on the PC
+=====================================
+PC(config)#no ip routing
+
+PC(config)#interface ethernet0/0
+PC(config-if)#ip address 172.16.0.100 255.255.255.0
+PC(config-if)#no shutdown 
+PC(config-if)#exit
+
+PC(config)#ip default-gateway 172.16.0.254 <-- IP Address Virtual Router
+PC(config)#exit
+=====================================
+
+>>>>> Testing <<<<<
+[Step 10]: Host PC ping to 1.1.1.1 (150 times)
+=====================================
+PC#ping 1.1.1.1 repeat 150
+Type escape sequence to abort.
+Sending 150, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!
+Success rate is 100 percent (150/150), round-trip min/avg/max = 2/2/4 ms
+=====================================
