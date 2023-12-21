@@ -1,0 +1,265 @@
+on SW1,
+[Step1]: Configuring EtherChannel using the LACP mode and Load Balancing (Open Standard Protocal) on SW1
+=========================================
+SW1(config)#interface range ethernet0/0-1
+SW1(config-if-range)#channel-group 1 mode active 
+Creating a port-channel interface Port-channel 1
+SW2(config-if-range)#exit
+=========================================
+
+on SW2,
+[Step2]: Configuring EtherChannel using the LACP mode and Load Balancing (Open Standard Protocal) on SW2
+=========================================
+SW2(config)#interface range ethernet0/0-1
+SW2(config-if-range)#channel-group 1 mode passive 
+Creating a port-channel interface Port-channel 1
+SW2(config-if-range)#exit
+=========================================
+
+[Step3]: Check if the Port-channel1 has been created on SW1
+=========================================
+SW1#show ip interface brief 
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up      
+Ethernet0/1            unassigned      YES unset  up                    up      
+Ethernet0/2            unassigned      YES unset  up                    up      
+Ethernet0/3            unassigned      YES unset  up                    up      
+Port-channel1          unassigned      YES unset  up                    up    		<--
+=========================================
+
+[Step4]: Check if the Port-channel1 has been created on SW2
+=========================================
+SW2#show ip interface brief 
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up      
+Ethernet0/1            unassigned      YES unset  up                    up      
+Ethernet0/2            unassigned      YES unset  up                    up      
+Ethernet0/3            unassigned      YES unset  up                    up      
+Port-channel1          unassigned      YES unset  up                    up 		    <--
+=========================================
+
+[Step5]: The “show etherchannel summary” can be used to simply display one line of information per port-channel.
+=========================================
+SW1#show etherchannel summary 
+Flags:  D - down        P - bundled in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+
+        M - not in use, minimum links not met
+        u - unsuitable for bundling
+        w - waiting to be aggregated
+        d - default port
+
+
+Number of channel-groups in use: 1
+Number of aggregators:           1
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+-----------------------------------------------
+1      Po1(SU)         LACP      Et0/0(P)    Et0/1(P)    <--
+=========================================
+
+[Step6]: The “show etherchannel summary” can be used to simply display one line of information per port-channel.
+=========================================
+SW2#show etherchannel summary 
+Flags:  D - down        P - bundled in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+
+        M - not in use, minimum links not met
+        u - unsuitable for bundling
+        w - waiting to be aggregated
+        d - default port
+
+
+Number of channel-groups in use: 1
+Number of aggregators:           1
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+-----------------------------------------------
+1      Po1(SU)         LACP      Et0/0(P)    Et0/1(P)    <--   
+=========================================
+
+[Step7]: The “show etherchannel <number> port-channel” command can be used to display information about a specific port channel (in this case port-channel1)
+=========================================
+SW1#show etherchannel 1 port-channel 
+Port-channels in the group: 
+---------------------------
+
+Port-channel: Po1    (Primary Aggregator)
+
+------------
+
+Age of the Port-channel   = 0d:00h:07m:15s
+Logical slot/port   = 16/0          Number of ports = 2
+HotStandBy port = null 
+Port state          = Port-channel Ag-Inuse 
+Protocol            =   LACP
+Port security       = Disabled
+
+Ports in the Port-channel: 
+
+Index   Load   Port     EC state        No of bits
+------+------+------+------------------+-----------
+  0     00     Et0/0    Active             0
+  0     00     Et0/1    Active             0
+
+Time since last port bundled:    0d:00h:00m:14s    Et0/1
+Time since last port Un-bundled: 0d:00h:00m:20s    Et0/0
+=========================================
+
+[Step8]: The “show etherchannel <number> port-channel” command can be used to display information about a specific port channel (in this case port-channel1)
+=========================================
+SW2#show etherchannel 1 port-channel 
+Port-channels in the group: 
+---------------------------
+
+Port-channel: Po1    (Primary Aggregator)
+
+------------
+
+Age of the Port-channel   = 0d:00h:05m:53s
+Logical slot/port   = 16/0          Number of ports = 2
+HotStandBy port = null 
+Port state          = Port-channel Ag-Inuse 
+Protocol            =   LACP
+Port security       = Disabled
+
+Ports in the Port-channel: 
+
+Index   Load   Port     EC state        No of bits
+------+------+------+------------------+-----------
+  0     00     Et0/0    Passive            0
+  0     00     Et0/1    Passive            0
+
+Time since last port bundled:    0d:00h:00m:44s    Et0/1
+Time since last port Un-bundled: 0d:00h:00m:49s    Et0/0
+=========================================
+
+[Step9]: The "show interfaces <interface_name> etherchannel" command can be used to display detailed information about the EtherChannel on each interface.
+=========================================
+SW1#show interfaces ethernet0/0 etherchannel 
+Port state    = Up Mstr Assoc In-Bndl 
+Channel group = 1           Mode = Active          Gcchange = -
+Port-channel  = Po1         GC   =   -             Pseudo port-channel = Po1
+Port index    = 0           Load = 0x00            Protocol =   LACP
+
+Flags:  S - Device is sending Slow LACPDUs   F - Device is sending fast LACPDUs.
+        A - Device is in active mode.        P - Device is in passive mode.
+
+Local information:
+                            LACP port     Admin     Oper    Port        Port
+Port      Flags   State     Priority      Key       Key     Number      State
+Et0/0     SA      bndl      32768         0x1       0x1     0x1         0x3D  
+
+Partner's information:
+
+                  LACP port                        Admin  Oper   Port    Port
+Port      Flags   Priority  Dev ID          Age    key    Key    Number  State
+Et0/0     SP      32768     aabb.cc00.2a00   3s    0x0    0x1    0x1     0x3C  
+
+Age of the port in the current state: 0d:00h:01m:50s
+
+
+SW1#show interfaces ethernet0/1 etherchannel 
+Port state    = Up Mstr Assoc In-Bndl 
+Channel group = 1           Mode = Active          Gcchange = -
+Port-channel  = Po1         GC   =   -             Pseudo port-channel = Po1
+Port index    = 0           Load = 0x00            Protocol =   LACP
+
+Flags:  S - Device is sending Slow LACPDUs   F - Device is sending fast LACPDUs.
+        A - Device is in active mode.        P - Device is in passive mode.
+
+Local information:
+                            LACP port     Admin     Oper    Port        Port
+Port      Flags   State     Priority      Key       Key     Number      State
+Et0/1     SA      bndl      32768         0x1       0x1     0x2         0x3D  
+
+Partner's information:
+
+                  LACP port                        Admin  Oper   Port    Port
+Port      Flags   Priority  Dev ID          Age    key    Key    Number  State
+Et0/1     SP      32768     aabb.cc00.2a00  19s    0x0    0x1    0x2     0x3C  
+
+Age of the port in the current state: 0d:00h:02m:28s
+=========================================
+
+[Step10]: The "show interfaces <interface_name> etherchannel" command can be used to display detailed information about the EtherChannel on each interface.
+=========================================
+SW2#show interfaces ethernet0/0 etherchannel 
+Port state    = Up Mstr Assoc In-Bndl 
+Channel group = 1           Mode = Passive         Gcchange = -
+Port-channel  = Po1         GC   =   -             Pseudo port-channel = Po1
+Port index    = 0           Load = 0x00            Protocol =   LACP
+
+Flags:  S - Device is sending Slow LACPDUs   F - Device is sending fast LACPDUs.
+        A - Device is in active mode.        P - Device is in passive mode.
+
+Local information:
+                            LACP port     Admin     Oper    Port        Port
+Port      Flags   State     Priority      Key       Key     Number      State
+Et0/0     SP      bndl      32768         0x1       0x1     0x1         0x3C  
+
+Partner's information:
+
+                  LACP port                        Admin  Oper   Port    Port
+Port      Flags   Priority  Dev ID          Age    key    Key    Number  State
+Et0/0     SA      32768     aabb.cc00.1a00   9s    0x0    0x1    0x1     0x3D  
+
+Age of the port in the current state: 0d:00h:03m:47s
+
+
+SW2#show interfaces ethernet0/1 etherchannel 
+Port state    = Up Mstr Assoc In-Bndl 
+Channel group = 1           Mode = Passive         Gcchange = -
+Port-channel  = Po1         GC   =   -             Pseudo port-channel = Po1
+Port index    = 0           Load = 0x00            Protocol =   LACP
+
+Flags:  S - Device is sending Slow LACPDUs   F - Device is sending fast LACPDUs.
+        A - Device is in active mode.        P - Device is in passive mode.
+
+Local information:
+                            LACP port     Admin     Oper    Port        Port
+Port      Flags   State     Priority      Key       Key     Number      State
+Et0/1     SP      bndl      32768         0x1       0x1     0x2         0x3C  
+
+Partner's information:
+
+                  LACP port                        Admin  Oper   Port    Port
+Port      Flags   Priority  Dev ID          Age    key    Key    Number  State
+Et0/1     SA      32768     aabb.cc00.1a00  29s    0x0    0x1    0x2     0x3D  
+
+Age of the port in the current state: 0d:00h:04m:06s
+=========================================
+
+[Step11]: How do I configure EtherChannel load balancing and view the load-balancing configuration on SW1?
+=========================================
+SW1(config)#port-channel load-balance src-dst-ip
+
+SW1#show etherchannel load-balance 
+EtherChannel Load-Balancing Configuration:
+        src-dst-ip			<--
+
+EtherChannel Load-Balancing Addresses Used Per-Protocol:
+Non-IP: Source XOR Destination MAC address
+  IPv4: Source XOR Destination IP address
+  IPv6: Source XOR Destination IP address
+=========================================
+
+[Step12]: How do I configure EtherChannel load balancing and view the load-balancing configuration on SW2?
+=========================================
+SW2(config)#port-channel load-balance src-dst-ip
+
+SW2#show etherchannel load-balance 
+EtherChannel Load-Balancing Configuration:
+        src-dst-ip			<--
+
+EtherChannel Load-Balancing Addresses Used Per-Protocol:
+Non-IP: Source XOR Destination MAC address
+  IPv4: Source XOR Destination IP address
+  IPv6: Source XOR Destination IP address
+=========================================
