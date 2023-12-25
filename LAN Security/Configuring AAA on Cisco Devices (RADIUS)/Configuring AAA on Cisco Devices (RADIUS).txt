@@ -52,13 +52,12 @@ R1#
 
 User Access Verification
 
-Username: 
 Username: user1
-Password: 
+Password: cisco
 % Login invalid
 
 Username: user2
-Password: 
+Password: cisco
 % Login invalid
 ==============================================
 
