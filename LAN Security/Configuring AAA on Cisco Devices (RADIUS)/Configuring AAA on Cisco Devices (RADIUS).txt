@@ -2,6 +2,7 @@ on Radius Server,
 =============================================
 Radius Port: 1645
 Secret: 123456
+ServerType: Radius
 
 Username: user1
 Password: cisco
