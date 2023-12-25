@@ -1,0 +1,92 @@
+on R1,
+=======================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface loopback 0
+R1(config-if)#ip address 1.1.1.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#router ospf 1 
+R1(config-router)#router-id 1.1.1.1
+R1(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R1(config-router)#network 1.1.1.0 255.255.255.0 area 0
+R1(config-router)#exit
+=======================================
+
+on R2,
+=======================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#interface ethernet0/1
+R2(config-if)#ip address 192.168.23.1 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#router ospf 1
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#network 192.168.23.0 0.0.0.255 area 0
+R2(config-router)#exit
+=======================================
+
+on R3,
+=======================================
+R3(config)#interface ethernet0/0
+R3(config-if)#ip address 192.168.23.2 255.255.255.0
+R3(config-if)#no shutdown
+R3(config-if)#exit
+
+R3(config)#interface loopback 0
+R3(config-if)#ip address 3.3.3.3 255.255.255.0
+R3(config-if)#no shutdown 
+R3(config-if)#exit
+
+R3(config)#router ospf 1
+R3(config-router)#network 192.168.23.0 0.0.0.255 area 0
+R3(config-router)#network 3.3.3.0 0.0.0.255 area 0     
+R3(config-router)#exit
+=======================================
+
+The command that displays information about OSPF.
+=======================================
+R1#show ip ospf neighbor	<-- Displays detailed neighbor information.
+R2#show ip ospf neighbor
+R3#show ip ospf neighbor
+
+
+R1#show ip protocols		<-- Displays information about OSPF, including the RouterID.
+R2#show ip protocols
+R3#show ip protocols
+
+R1#show ip route ospf		<-- Displays OSPF routing information.
+R2#show ip route ospf
+R3#show ip route ospf
+
+R1#show ip ospf database	<-- Displays detailed OSPF database information.
+R2#show ip ospf database
+R3#show ip ospf database
+=======================================
+
+
+>>>>> Testing <<<<<
+=======================================
+R1#ping 3.3.3.3 source 1.1.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 3.3.3.3, timeout is 2 seconds:
+Packet sent with a source address of 1.1.1.1 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+R3#ping 1.1.1.1 source 3.3.3.3
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
+Packet sent with a source address of 3.3.3.3 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+=======================================
