@@ -1,0 +1,88 @@
+on Radius Server,
+=============================================
+Radius Port: 1645
+Secret: 123456
+
+Username: user1
+Password: cisco
+
+Username: user2
+Password: cisco
+=============================================
+
+on R1,
+=============================================
+R1(config)#interface gigabitEthernet0/1
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown
+R1(config-if)#exit
+
+R1(config)#aaa new-model
+R1(config)#aaa authentication login default local
+R1(config)#username admin privilege 15 password cisco
+R1(config)#enable secret cisco
+
+R1(config)#aaa authentication login RADIUS group radius
+R1(config)#radius-server host 192.168.12.254 auth-port 1645 key 123456
+
+R1(config)#line console 0
+R1(config-line)#login authentication default
+R1(config-line)#exit
+
+R1(config)#line vty 0 4
+R1(config-line)#login authentication RADIUS
+R1(config-line)#exit
+==============================================
+
+
+>>>>> Testing <<<<<
+
+on PC1,
+==============================================
+Console to R1
+
+User Access Verification
+
+Username: admin
+Password: cisco
+R1>enable
+Password: cisco
+R1#
+
+User Access Verification
+
+Username: 
+Username: user1
+Password: 
+% Login invalid
+
+Username: user2
+Password: 
+% Login invalid
+==============================================
+
+on PC2,
+==============================================
+
+C:\>telnet 192.168.12.1
+Trying 192.168.12.1 ...Open
+
+
+User Access Verification
+
+Username: admin
+Password: cisco
+% Login invalid
+
+Username: user1
+Password: cisco
+R1>enable
+Password: cisco
+R1#
+
+Username: user2
+Password: cisco
+R1>enable
+Password: cisco
+R1#
+==============================================
