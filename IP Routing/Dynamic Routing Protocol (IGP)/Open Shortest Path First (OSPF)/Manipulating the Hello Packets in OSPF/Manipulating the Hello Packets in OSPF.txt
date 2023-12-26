@@ -56,7 +56,7 @@ Ethernet0/0 is up, line protocol is up
   Designated Router (ID) 1.1.1.1, Interface address 192.168.12.1
   Backup Designated router (ID) 2.2.2.2, Interface address 192.168.12.2
   Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
-    oob-resync timeout 40             ^         ^
+    oob-resync timeout 40       ^         ^
     Hello due in 00:00:06       ^         ^
   Supports Link-local Signaling (LLS)
   Cisco NSF helper support enabled
