@@ -1,0 +1,209 @@
+on R1, R2, R3 and R4
+[Step1]: All IP addresses are already configured as on the picture
+======================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown
+R2(config-if)#exit
+
+R3(config)#interface ethernet0/0
+R3(config-if)#ip address 192.168.12.3 255.255.255.0
+R3(config-if)#no shutdown
+R3(config-if)#exit
+
+R4(config)#interface ethernet0/0
+R4(config-if)#ip address 192.168.12.4 255.255.255.0
+R4(config-if)#no shutdown 
+R4(config-if)#exit
+======================================
+
+on R1, R2, R3 and R4
+[Step2]: Configure OSPF on all routers with the proper Router ID on each router and enable OSPF on each connected interface.
+======================================
+R1(config)#router ospf 1
+R1(config-router)#router-id 1.1.1.1
+R1(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R1(config-router)#exit
+
+R2(config)#router ospf 1
+R2(config-router)#router-id 2.2.2.2
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#exit
+
+R3(config)#router ospf 1
+R3(config-router)#router-id 3.3.3.3
+R3(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R3(config-router)#exit
+
+R4(config)#router ospf 1
+R4(config-router)#router-id 4.4.4.4
+R4(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R4(config-router)#exit
+======================================
+
+[Step3]: Which routers have been elected as DR and BDR, and for what reason?
+======================================
+R1#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+2.2.2.2           1   2WAY/DROTHER    00:00:39    192.168.12.2    Ethernet0/0
+3.3.3.3           1   FULL/BDR        00:00:33    192.168.12.3    Ethernet0/0	<-- BDR (R3 becomes the BDR as it has a Router ID secondary to R4, which is 3.3.3.3)
+4.4.4.4           1   FULL/DR         00:00:36    192.168.12.4    Ethernet0/0	<-- DR (R4 becomes the DR as it has the highest Router ID value, which is 4.4.4.4)
+======================================
+
+[Step4]: Make the necessary changes so R1 become the DR and R2 becomes the BDR.
+======================================
+R1(config)#router ospf 1
+R1(config-router)#router-id 11.11.11.11
+R1(config-router)#exit
+
+R2(config)#router ospf 1
+R2(config-router)#router-id 9.9.9.9
+R2(config-router)#exit
+
+R1#clear ip ospf process 				<-- Clear OSPF Process on R1 or turn off/on R1 again.
+Reset ALL OSPF processes? [no]: y
+
+R2#clear ip ospf process 				<-- Clear OSPF Process on R2 or turn off/on R2 again.
+Reset ALL OSPF processes? [no]: y
+
+R3#clear ip ospf process 				<-- Clear OSPF Process on R3 or turn off/on R3 again.
+Reset ALL OSPF processes? [no]: y
+
+R4#clear ip ospf process 				<-- Clear OSPF Process on R4 or turn off/on R4 again.
+Reset ALL OSPF processes? [no]: y
+
+R3#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+4.4.4.4           1   2WAY/DROTHER    00:00:33    192.168.12.4    Ethernet0/0
+9.9.9.9           1   FULL/BDR        00:00:37    192.168.12.2    Ethernet0/0	<-- BDR (R2 becomes the BDR instead of R3 because it has a Router ID secondary to R1, which is 9.9.9.9)
+11.11.11.11       1   FULL/DR         00:00:36    192.168.12.1    Ethernet0/0	<-- DR (R1 takes over as the DR instead of R4 because it has the highest Router ID value, which is 11.11.11.11)
+======================================
+
+[Step5]: Make R3 the DR (You are not allowed to change the Router ID)
+======================================
+R3#show ip ospf interface ethernet0/0
+
+Ethernet0/0 is up, line protocol is up 
+  Internet Address 192.168.12.3/24, Area 0, Attached via Network Statement
+  Process ID 1, Router ID 3.3.3.3, Network Type BROADCAST, Cost: 10
+  Topology-MTID    Cost    Disabled    Shutdown      Topology Name
+        0           10        no          no            Base
+  Transmit Delay is 1 sec, State DROTHER, Priority 1							<-- Default Priority is 1 (Hint: Increase value)
+  Designated Router (ID) 11.11.11.11, Interface address 192.168.12.1
+  Backup Designated router (ID) 9.9.9.9, Interface address 192.168.12.2
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    oob-resync timeout 40
+    Hello due in 00:00:02
+  Supports Link-local Signaling (LLS)
+  Cisco NSF helper support enabled
+  IETF NSF helper support enabled
+  Index 1/1/1, flood queue length 0
+  Next 0x0(0)/0x0(0)/0x0(0)
+  Last flood scan length is 0, maximum is 1
+  Last flood scan time is 0 msec, maximum is 0 msec
+  Neighbor Count is 3, Adjacent neighbor count is 2 
+    Adjacent with neighbor 9.9.9.9  (Backup Designated Router)
+    Adjacent with neighbor 11.11.11.11  (Designated Router)
+  Suppress hello for 0 neighbor(s)
+
+R3(config)#interface ethernet0/0
+R3(config-if)#ip ospf priority 2
+R3(config-if)#exit
+
+R1#clear ip ospf process 				<-- Clear OSPF Process on R1 or turn off/on R1 again.
+Reset ALL OSPF processes? [no]: y
+
+R2#clear ip ospf process 				<-- Clear OSPF Process on R2 or turn off/on R2 again.
+Reset ALL OSPF processes? [no]: y
+
+R3#clear ip ospf process 				<-- Clear OSPF Process on R3 or turn off/on R3 again.
+Reset ALL OSPF processes? [no]: y
+
+R4#clear ip ospf process 				<-- Clear OSPF Process on R4 or turn off/on R4 again.
+Reset ALL OSPF processes? [no]: y
+
+
+R4#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+3.3.3.3           2   FULL/DR         00:00:39    192.168.12.3    Ethernet0/0		<-- DR (R3 takes over as the DR instead of R1 because it has the highest Priority value, and Priority takes precedence over Router ID)
+9.9.9.9           1   2WAY/DROTHER    00:00:30    192.168.12.2    Ethernet0/0
+11.11.11.11       1   FULL/BDR        00:00:30    192.168.12.1    Ethernet0/0		<-- BDR (R1 becomes the BDR because it has the highest Router ID value)
+======================================
+
+[Step6]: Make the changes needed so R2 is the DR and all other routers don't enter into the elections for DR/BDR
+======================================
+R2#show ip ospf interface ethernet0/0
+
+Ethernet0/0 is up, line protocol is up 
+  Internet Address 192.168.12.2/24, Area 0, Attached via Network Statement
+  Process ID 1, Router ID 9.9.9.9, Network Type BROADCAST, Cost: 10
+  Topology-MTID    Cost    Disabled    Shutdown      Topology Name
+        0           10        no          no            Base
+  Transmit Delay is 1 sec, State BDR, Priority 1									<-- Default Priority is 1 on R2
+  Designated Router (ID) 3.3.3.3, Interface address 192.168.12.3
+  Backup Designated router (ID) 9.9.9.9, Interface address 192.168.12.2
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    oob-resync timeout 40
+    Hello due in 00:00:01
+  Supports Link-local Signaling (LLS)
+  Cisco NSF helper support enabled
+  IETF NSF helper support enabled
+  Index 1/1/1, flood queue length 0
+  Next 0x0(0)/0x0(0)/0x0(0)
+  Last flood scan length is 0, maximum is 1
+  Last flood scan time is 0 msec, maximum is 0 msec
+  Neighbor Count is 3, Adjacent neighbor count is 3 
+    Adjacent with neighbor 3.3.3.3  (Designated Router)
+    Adjacent with neighbor 4.4.4.4
+    Adjacent with neighbor 11.11.11.11
+  Suppress hello for 0 neighbor(s)
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip ospf priority 0
+R1(config-if)#exit
+
+R3(config)#interface ethernet0/0
+R3(config-if)#ip ospf priority 0
+R3(config-if)#exit
+
+R4(config)#inter ethernet0/0
+R4(config-if)#ip ospf priority 0
+R4(config-if)#exit
+
+
+R1#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+3.3.3.3           0   2WAY/DROTHER    00:00:36    192.168.12.3    Ethernet0/0		<-- R3 don't enter into the elections for DR/BDR
+4.4.4.4           0   2WAY/DROTHER    00:00:35    192.168.12.4    Ethernet0/0       <-- R4 don't enter into the elections for DR/BDR
+9.9.9.9           1   FULL/DR         00:00:37    192.168.12.2    Ethernet0/0		<-- R2 becomes the DR
+
+R2#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+3.3.3.3           0   FULL/DROTHER    00:00:34    192.168.12.3    Ethernet0/0		<-- R3 don't enter into the elections for DR/BDR
+4.4.4.4           0   FULL/DROTHER    00:00:38    192.168.12.4    Ethernet0/0       <-- R4 don't enter into the elections for DR/BDR
+11.11.11.11       0   FULL/DROTHER    00:00:37    192.168.12.1    Ethernet0/0       <-- R1 don't enter into the elections for DR/BDR
+
+R3#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+4.4.4.4           0   2WAY/DROTHER    00:00:30    192.168.12.4    Ethernet0/0		<-- R4 don't enter into the elections for DR/BDR
+9.9.9.9           1   FULL/DR         00:00:34    192.168.12.2    Ethernet0/0		<-- R2 becomes the DR
+11.11.11.11       0   2WAY/DROTHER    00:00:38    192.168.12.1    Ethernet0/0       <-- R1 don't enter into the elections for DR/BDR
+
+R4#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+3.3.3.3           0   2WAY/DROTHER    00:00:39    192.168.12.3    Ethernet0/0		<-- R3 don't enter into the elections for DR/BDR
+9.9.9.9           1   FULL/DR         00:00:39    192.168.12.2    Ethernet0/0		<-- R2 becomes the DR
+11.11.11.11       0   2WAY/DROTHER    00:00:34    192.168.12.1    Ethernet0/0       <-- R1 don't enter into the elections for DR/BDR
+======================================

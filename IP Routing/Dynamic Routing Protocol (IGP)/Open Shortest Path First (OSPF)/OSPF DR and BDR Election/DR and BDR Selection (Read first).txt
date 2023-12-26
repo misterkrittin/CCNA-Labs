@@ -1,0 +1,6 @@
+The sequencing for selecting DR/BDR in OSPF is as follows:
+
+1 - Priority: The router with the highest priority becomes the DR or BDR in that subnet.
+2 - Router ID: If the priorities are the same or no priority is specified, the router with the highest Router ID becomes the DR or BDR.
+3 - Loopback: If priorities and Router IDs are identical and there are loopback interfaces, the DR/BDR is selected based on the highest IP address of the loopback interfaces.
+4 - Highest IP: If priorities, Router IDs, and loopback addresses are all the same, the DR/BDR is selected based on the highest IP address among the interfaces.
