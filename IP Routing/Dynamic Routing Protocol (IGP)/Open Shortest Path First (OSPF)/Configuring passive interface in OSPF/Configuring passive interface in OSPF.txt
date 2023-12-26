@@ -1,0 +1,55 @@
+on R2,
+========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#router ospf 1
+R2(config-router)#router-id 2.2.2.2
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#exit
+========================================
+
+on R1,
+========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 192.168.1.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#router ospf 1
+R1(config-router)#router-id 1.1.1.1
+R1(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R1(config-router)#network 192.168.1.0 0.0.0.255 area 0
+R1(config-router)#passive-interface ethernet0/1			<-- Passive Interface ethernet0/1 (LAN Interface)
+R1(config-router)#exit
+========================================
+
+>>>>> Testing <<<<<
+
+========================================
+R1#debug ip ospf hello
+
+OSPF hello debugging is on
+R1#
+*Dec 26 02:57:25.524: OSPF-1 HELLO Et0/0: Send hello to 224.0.0.5 area 0 from 192.168.12.1
+R1#
+*Dec 26 02:57:26.838: OSPF-1 HELLO Et0/0: Rcv hello from 2.2.2.2 area 0 192.168.12.2
+R1#
+*Dec 26 02:57:34.963: OSPF-1 HELLO Et0/0: Send hello to 224.0.0.5 area 0 from 192.168.12.1
+R1#
+*Dec 26 02:57:36.565: OSPF-1 HELLO Et0/0: Rcv hello from 2.2.2.2 area 0 192.168.12.2
+R1#
+*Dec 26 02:57:44.320: OSPF-1 HELLO Et0/0: Send hello to 224.0.0.5 area 0 from 192.168.12.1
+R1#
+*Dec 26 02:57:45.931: OSPF-1 HELLO Et0/0: Rcv hello from 2.2.2.2 area 0 192.168.12.2
+
+R1#undebug all
+All possible debugging has been turned off
+========================================
