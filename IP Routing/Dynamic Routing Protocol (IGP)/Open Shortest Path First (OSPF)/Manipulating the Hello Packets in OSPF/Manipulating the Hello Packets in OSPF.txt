@@ -1,0 +1,235 @@
+on R1,
+[Step1]: Configure OSPF on R1 and advertise the connected network.
+========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#router ospf 1
+R1(config-router)#router-id 1.1.1.1
+R1(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R1(config-router)#exit
+========================================
+
+on R2,
+[Step2]: Configure OSPF on R2 and advertise the connected network.
+========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown
+R2(config-if)#exit
+
+R2(config)#router ospf 1
+R2(config-router)#router
+R2(config-router)#router-id 2.2.2.2
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#exit
+========================================
+
+on R1 & R2
+[Step3]: Check if both routers formed neighborship in OSPF
+========================================
+R1#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+2.2.2.2           1   FULL/BDR        00:00:37    192.168.12.2    Ethernet0/0
+
+
+R2#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+1.1.1.1           1   FULL/DR         00:00:31    192.168.12.1    Ethernet0/0
+========================================
+
+on R2,
+[Step4]: Check the Hello Interval value on R2.
+========================================
+R2#show ip ospf interface ethernet0/0
+
+Ethernet0/0 is up, line protocol is up 
+  Internet Address 192.168.12.2/24, Area 0, Attached via Network Statement
+  Process ID 1, Router ID 2.2.2.2, Network Type BROADCAST, Cost: 10
+  Topology-MTID    Cost    Disabled    Shutdown      Topology Name
+        0           10        no          no            Base
+  Transmit Delay is 1 sec, State BDR, Priority 1
+  Designated Router (ID) 1.1.1.1, Interface address 192.168.12.1
+  Backup Designated router (ID) 2.2.2.2, Interface address 192.168.12.2
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    oob-resync timeout 40             ^         ^
+    Hello due in 00:00:06       ^         ^
+  Supports Link-local Signaling (LLS)
+  Cisco NSF helper support enabled
+  IETF NSF helper support enabled
+  Index 1/1/1, flood queue length 0
+  Next 0x0(0)/0x0(0)/0x0(0)
+  Last flood scan length is 1, maximum is 1
+  Last flood scan time is 0 msec, maximum is 0 msec
+  Neighbor Count is 1, Adjacent neighbor count is 1 
+    Adjacent with neighbor 1.1.1.1  (Designated Router)
+  Suppress hello for 0 neighbor(s)
+========================================
+
+on R2,
+[Step5]: Change the hello interval on R2 to 12 sec. Do the routers have neighborship?
+========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip ospf hello-interval 12
+R2(config-if)#exit
+
+R2#show ip ospf interface ethernet0/0
+
+Ethernet0/0 is up, line protocol is up 
+  Internet Address 192.168.12.2/24, Area 0, Attached via Network Statement
+  Process ID 1, Router ID 2.2.2.2, Network Type BROADCAST, Cost: 10
+  Topology-MTID    Cost    Disabled    Shutdown      Topology Name
+        0           10        no          no            Base
+  Transmit Delay is 1 sec, State BDR, Priority 1
+  Designated Router (ID) 1.1.1.1, Interface address 192.168.12.1
+  Backup Designated router (ID) 2.2.2.2, Interface address 192.168.12.2
+  Timer intervals configured, Hello 12, Dead 48, Wait 48, Retransmit 5
+    oob-resync timeout 48       ^         ^
+    Hello due in 00:00:04       ^         ^
+  Supports Link-local Signaling (LLS)
+  Cisco NSF helper support enabled
+  IETF NSF helper support enabled
+  Index 1/1/1, flood queue length 0
+  Next 0x0(0)/0x0(0)/0x0(0)
+  Last flood scan length is 1, maximum is 1
+  Last flood scan time is 0 msec, maximum is 0 msec
+  Neighbor Count is 1, Adjacent neighbor count is 1 
+    Adjacent with neighbor 1.1.1.1  (Designated Router)
+  Suppress hello for 0 neighbor(s)
+
+R2#show ip ospf neighbor
+----> Empty <----
+========================================
+
+on R2
+[Step6]: Change the hello interval on R2 back to 10 sec. Is the neighborship formed again?
+========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip ospf hello-interval 10
+R2(config-if)#exit
+
+R2#show ip ospf interface ethernet0/0
+
+Ethernet0/0 is up, line protocol is up 
+  Internet Address 192.168.12.2/24, Area 0, Attached via Network Statement
+  Process ID 1, Router ID 2.2.2.2, Network Type BROADCAST, Cost: 10
+  Topology-MTID    Cost    Disabled    Shutdown      Topology Name
+        0           10        no          no            Base
+  Transmit Delay is 1 sec, State DR, Priority 1
+  Designated Router (ID) 2.2.2.2, Interface address 192.168.12.2
+  Backup Designated router (ID) 1.1.1.1, Interface address 192.168.12.1
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    oob-resync timeout 40       ^	  ^
+    Hello due in 00:00:08       ^	  ^
+  Supports Link-local Signaling (LLS)
+  Cisco NSF helper support enabled
+  IETF NSF helper support enabled
+  Index 1/1/1, flood queue length 0
+  Next 0x0(0)/0x0(0)/0x0(0)
+  Last flood scan length is 0, maximum is 2
+  Last flood scan time is 0 msec, maximum is 0 msec
+  Neighbor Count is 1, Adjacent neighbor count is 1 
+    Adjacent with neighbor 1.1.1.1  (Backup Designated Router)
+  Suppress hello for 0 neighbor(s)
+
+R2#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+1.1.1.1           1   FULL/BDR        00:00:31    192.168.12.1    Ethernet0/0
+========================================
+
+on R2
+[Step7]: Put R2 in area 1 Did the 2 routers lose their neighborship?
+========================================
+R2(config)#router ospf 1               
+R2(config-router)#no network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 1
+R2(config-router)#exit
+
+*Dec 26 03:49:15.576: %OSPF-4-ERRRCV: Received invalid packet: mismatched area ID from backbone area from 192.168.12.1, Ethernet0/0  <-- Warning on R2
+
+R2#show ip ospf neighbor
+----> Empty <----
+
+R1#show ip ospf neighbor
+----> Empty <----
+========================================
+
+on R2
+[Step8]: Put R2 in area 0 again and check whether R1 and R2 formed neighborship again.
+========================================
+R2(config)#router ospf 1
+R2(config-router)#no network 192.168.12.0 0.0.0.255 area 1
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#exit
+
+R2#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+1.1.1.1           1   FULL/DR         00:00:36    192.168.12.1    Ethernet0/0
+
+R1#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+2.2.2.2           1   FULL/BDR        00:00:33    192.168.12.2    Ethernet0/0
+========================================
+
+on R2,
+[Step9]: Change the authentication in R2 from none to plain-text and put a password of 123456
+========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip ospf authentication
+R2(config-if)#ip ospf authentication-key 123456
+R2(config-if)#exit
+========================================
+
+on R1 & R2,
+[Step10]: Did R1 and R2 lose neighborship?
+========================================
+R2#show ip ospf neighbor
+----> Empty <----
+
+R1#show ip ospf neighbor
+----> Empty <----
+========================================
+
+on R1,
+[Step11]: Change the authentication in R1 from none to plain-text and put a password of 123456
+========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip ospf authentication
+R1(config-if)#ip ospf authentication-key 123456
+R1(config-if)#exit
+========================================
+
+on R1 & R2,
+[Step12]: Is the neighborship formed again?
+========================================
+R1#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+2.2.2.2           1   FULL/DR         00:00:34    192.168.12.2    Ethernet0/0
+
+R2#show ip ospf neighbor 
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+1.1.1.1           1   FULL/BDR        00:00:32    192.168.12.1    Ethernet0/0
+========================================
+
+on R1 & R2,
+[Step13]: Remove OSPF authentication on R1 and R2
+========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#no ip ospf authentication
+R1(config-if)#no ip ospf authentication-key
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/0
+R1(config-if)#no ip ospf authentication
+R1(config-if)#no ip ospf authentication-key
+R1(config-if)#exit
+========================================
