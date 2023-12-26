@@ -1,0 +1,151 @@
+on R1,
+[Step1]: All IP addresses are already configured as on the picture
+===============================
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.88.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+===========================================
+
+on R2,
+[Step2]: All IP addresses are already configured as on the picture
+===========================================
+R2(config)#interface ethernet0/1
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.99.1 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+===========================================
+
+on R1
+[Step3]: Enable OSPF on R1 and assign it Router id 1.1.1.1, then advertise 192.168.12.0/24 to OSPF
+===========================================
+R1(config)#router ospf 1
+R1(config-router)#router-id 1.1.1.1
+R1(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R1(config-router)#exit
+===========================================
+
+on R1
+[Step4]: Enable OSPF on R2 and assign it Router id 2.2.2.2, then advertise 192.168.12.0/24 to OSPF
+===========================================
+R2(config)#router ospf 1
+R2(config-router)#router-id 2.2.2.2
+R2(config-router)#network 192.168.12.0 0.0.0.255 area 0
+R2(config-router)#exit
+===========================================
+
+on R3,
+[Step5]: All IP addresses are already configured as on the picture and configure static route to reach 4.4.4.0/24 via 192.168.88.1
+===========================================
+R3(config)#interface ethernet0/0
+R3(config-if)#ip address 192.168.88.2 255.255.255.0
+R3(config-if)#no shutdown 
+R3(config-if)#exit
+
+R3(config)#interface loopback 0
+R3(config-if)#ip address 3.3.3.3 255.255.255.0
+R3(config-if)#no shutdown 
+R3(config-if)#exit
+
+R3(config)#ip route 4.4.4.0 255.255.255.0 192.168.88.1
+===========================================
+
+on R4,
+[Step6]: All IP addresses are already configured as on the picture and configure static route to reach 3.3.3.0/24 via 192.168.99.1
+===========================================
+R4(config)#interface ethernet0/0
+R4(config-if)#ip address 192.168.99.2 255.255.255.0
+R4(config-if)#no shutdown 
+R4(config-if)#exit
+
+
+R4(config)#interface loopback 0
+R4(config-if)#ip address 4.4.4.4 255.255.255.0
+R4(config-if)#no shutdown 
+R4(config-if)#exit
+
+R4(config)#ip route 3.3.3.0 255.255.255.0 192.168.99.1
+===========================================
+
+on R1,
+[Step7]: Configure Redistributing Static Routes into OSPF
+===========================================
+R1(config)#router ospf 1
+R1(config-router)#redistribute static subnets				<-- To redistribute static routes into an OSPF process
+R1(config-router)#exit
+
+R1(config)#ip route 3.3.3.0 255.255.255.0 192.168.88.2
+===========================================
+
+on R2,
+[Step8]: Configure Redistributing Static Routes into OSPF
+===========================================
+R2(config)#router ospf 1
+R2(config-router)#redistribute static subnets				<-- To redistribute static routes into an OSPF process
+R2(config-router)#exit
+
+R2(config)#ip route 4.4.4.0 255.255.255.0 192.168.99.2
+===========================================
+
+on R1 & R2,
+[Step9]: Display the router's routing table.
+===========================================
+R1#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is not set
+
+      3.0.0.0/24 is subnetted, 1 subnets
+S        3.3.3.0 [1/0] via 192.168.88.2
+      4.0.0.0/24 is subnetted, 1 subnets
+O E2     4.4.4.0 [110/20] via 192.168.12.2, 00:09:21, Ethernet0/1		<--
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Ethernet0/1
+L        192.168.12.1/32 is directly connected, Ethernet0/1
+      192.168.88.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.88.0/24 is directly connected, Ethernet0/0
+L        192.168.88.1/32 is directly connected, Ethernet0/0
+
+
+R2#show ip route     
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is not set
+
+      3.0.0.0/24 is subnetted, 1 subnets
+O E2     3.3.3.0 [110/20] via 192.168.12.1, 00:05:22, Ethernet0/1	        <--
+      4.0.0.0/24 is subnetted, 1 subnets
+S        4.4.4.0 [1/0] via 192.168.99.2
+      192.168.12.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.12.0/24 is directly connected, Ethernet0/1
+L        192.168.12.2/32 is directly connected, Ethernet0/1
+      192.168.99.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.99.0/24 is directly connected, Ethernet0/0
+L        192.168.99.1/32 is directly connected, Ethernet0/0
+===========================================
