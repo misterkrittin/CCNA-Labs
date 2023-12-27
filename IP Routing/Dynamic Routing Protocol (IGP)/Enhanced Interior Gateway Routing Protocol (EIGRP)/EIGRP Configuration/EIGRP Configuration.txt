@@ -69,7 +69,7 @@ R3(config-if)#exit
 R3(config)#router eigrp 100
 R3(config-router)#network 10.10.10.4 0.0.0.3
 R3(config-router)#network 10.10.10.16 0.0.0.3
-R3(config-router)#network 192.168.2.0
+R3(config-router)#network 192.168.2.0 					<-- Major Network Address
 R3(config-router)#no auto-summary 
 R3(config-router)#exit
 
