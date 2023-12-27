@@ -1,0 +1,54 @@
+on R1,
+=========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface loopback 0
+R1(config-if)#ip address 1.1.1.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#ip route 192.168.21.0 255.255.255.0 192.168.12.2
+R1(config)#ip route 3.3.3.0 255.255.255.0 192.168.12.2
+R1(config)#ip route 2.2.2.0 255.255.255.0 192.168.12.2
+=========================================
+
+on R2,
+=========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#interface ethernet0/1
+R2(config-if)#ip address 192.168.21.1 255.255.255.0 
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#interface loopback 0
+R2(config-if)#ip address 2.2.2.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#ip route 1.1.1.0 255.255.255.0 192.168.12.1
+R2(config)#ip route 3.3.3.0 255.255.255.0 192.168.21.2
+=========================================
+
+on R3,
+=========================================
+R3(config)#interface ethernet0/1
+R3(config-if)#ip address 192.168.21.2 255.255.255.0
+R3(config-if)#no shutdown 
+R3(config-if)#exit
+
+R3(config)#interface loopback 0
+R3(config-if)#ip address 3.3.3.3 255.255.255.0
+R3(config-if)#no shutdown 
+R3(config-if)#exit
+
+R3(config)#ip route 192.168.12.0 255.255.255.0 192.168.21.1
+R3(config)#ip route 1.1.1.0 255.255.255.0 192.168.21.1
+R3(config)#ip route 2.2.2.0 255.255.255.0 192.168.21.1
+=========================================
