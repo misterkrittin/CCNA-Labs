@@ -1,0 +1,107 @@
+on R1,
+[Step1]: All IP addresses are set as per the graph and add default route.
+==========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 11.11.11.1 255.255.255.252
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#ip route 0.0.0.0 0.0.0.0 11.11.11.2
+==========================================
+
+on R2,
+[Step2]: All IP addresses are set as per the graph
+==========================================
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 11.11.11.2 255.255.255.252
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R2(config)#interface ethernet0/1
+R2(config-if)#ip address 22.22.22.5 255.255.255.252
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+==========================================
+
+on R3,
+[Step2]: All IP addresses are set as per the graph and add default route.
+==========================================
+R3(config)#interface ethernet0/0
+R3(config-if)#ip address 22.22.22.6 255.255.255.252
+R3(config-if)#no shutdown 
+R3(config-if)#exit
+
+R3(config)#interface ethernet0/1
+R3(config-if)#ip address 192.168.21.1 255.255.255.0
+R3(config-if)#no shutdown
+R3(config-if)#exit
+
+R3(config)#ip route 0.0.0.0 0.0.0.0 22.22.22.5
+==========================================
+
+on PC1,
+[Step3]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC1, and try to ping the gateway (192.168.12.1).
+==========================================
+PC1(config)#no ip routing
+
+PC1(config)#interface ethernet0/0
+PC1(config-if)#ip address 192.168.12.2 255.255.255.0
+PC1(config-if)#no shutdown 
+PC1(config-if)#exit
+
+PC1(config)#ip default-gateway 192.168.12.1
+==========================================
+
+on PC2,
+[Step4]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC2, and try to ping the gateway (192.168.21.1).
+==========================================
+PC2(config)#no ip routing
+
+PC2(config)#interface ethernet0/0
+PC2(config-if)#ip address 192.168.21.2 255.255.255.0
+PC2(config-if)#no shutdown 
+PC2(config-if)#exit
+
+PC(config)#ip default-gateway 192.168.21.1
+==========================================
+
+on R1,
+[Step5]: Creating A Cisco GRE Tunnel
+==========================================
+R1(config)#interface tunnel 0
+R1(config-if)#ip address 172.16.0.1 255.255.255.252	<-- Tunnel Address
+R1(config-if)#ip mtu 1400				<-- Adjust the maximum transfer unit (MTU) to 1400 bytes
+R1(config-if)#ip tcp adjust-mss 1360			<-- Adjust the maximum segment size (MSS) to 1360 bytes
+R1(config-if)#tunnel source 11.11.11.1			<-- R1’s public IP address
+R1(config-if)#tunnel destination 22.22.22.6		<-- R3’s public IP address
+R1(config-if)#exit
+
+*Dec 29 14:25:40.019: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel0, changed state to up
+==========================================
+
+on R3,
+[Step6]: Creating A Cisco GRE Tunnel
+==========================================
+R3(config)#interface tunnel 0
+R3(config-if)#ip address 172.16.0.2 255.255.255.252	<-- Tunnel Address
+R3(config-if)#ip mtu 1400				<-- Adjust the maximum transfer unit (MTU) to 1400 bytes
+R3(config-if)#ip tcp adjust-mss 1360			<-- Adjust the maximum segment size (MSS) to 1360 bytes
+R3(config-if)#tunnel source 22.22.22.6			<-- R3’s public IP address
+R3(config-if)#tunnel destination 11.11.11.1		<-- R1’s public IP address
+R3(config-if)#exit
+
+*Dec 29 14:25:39.395: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel0, changed state to up
+==========================================
+
+on R1 & R3,
+[Step7]: Routing Networks Through The GRE Tunnel
+==========================================
+R1(config)#ip route 192.168.21.0 255.255.255.0 172.16.0.2
+
+R3(config)#ip route 192.168.12.0 255.255.255.0 172.16.0.1
+==========================================
