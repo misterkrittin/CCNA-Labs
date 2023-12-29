@@ -29,7 +29,7 @@ R2(config-if)#exit
 ==========================================
 
 on R3,
-[Step2]: All IP addresses are set as per the graph and add default route.
+[Step3]: All IP addresses are set as per the graph and add default route.
 ==========================================
 R3(config)#interface ethernet0/0
 R3(config-if)#ip address 22.22.22.6 255.255.255.252
@@ -45,7 +45,7 @@ R3(config)#ip route 0.0.0.0 0.0.0.0 22.22.22.5
 ==========================================
 
 on PC1,
-[Step3]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC1, and try to ping the gateway (192.168.12.1).
+[Step4]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC1, and try to ping the gateway (192.168.12.1).
 ==========================================
 PC1(config)#no ip routing
 
@@ -58,7 +58,7 @@ PC1(config)#ip default-gateway 192.168.12.1
 ==========================================
 
 on PC2,
-[Step4]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC2, and try to ping the gateway (192.168.21.1).
+[Step5]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC2, and try to ping the gateway (192.168.21.1).
 ==========================================
 PC2(config)#no ip routing
 
@@ -71,7 +71,7 @@ PC(config)#ip default-gateway 192.168.21.1
 ==========================================
 
 on R1,
-[Step5]: Creating A Cisco GRE Tunnel
+[Step6]: Creating A Cisco GRE Tunnel
 ==========================================
 R1(config)#interface tunnel 0
 R1(config-if)#ip address 172.16.0.1 255.255.255.252	<-- Tunnel Address
@@ -85,7 +85,7 @@ R1(config-if)#exit
 ==========================================
 
 on R3,
-[Step6]: Creating A Cisco GRE Tunnel
+[Step7]: Creating A Cisco GRE Tunnel
 ==========================================
 R3(config)#interface tunnel 0
 R3(config-if)#ip address 172.16.0.2 255.255.255.252	<-- Tunnel Address
@@ -99,9 +99,35 @@ R3(config-if)#exit
 ==========================================
 
 on R1 & R3,
-[Step7]: Routing Networks Through The GRE Tunnel
+[Step8]: Routing Networks Through The GRE Tunnel
 ==========================================
 R1(config)#ip route 192.168.21.0 255.255.255.0 172.16.0.2
 
 R3(config)#ip route 192.168.12.0 255.255.255.0 172.16.0.1
+==========================================
+
+>>>>> Testing <<<<<
+==========================================
+R1#ping 192.168.21.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.21.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/5 ms
+R1#ping 192.168.21.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.21.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/6 ms
+
+
+R3#ping 192.168.12.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/5 ms
+R3#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/6 ms
 ==========================================
