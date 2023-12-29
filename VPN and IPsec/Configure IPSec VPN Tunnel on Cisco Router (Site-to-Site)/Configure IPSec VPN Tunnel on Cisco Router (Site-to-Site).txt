@@ -29,7 +29,7 @@ R2(config-if)#exit
 ==========================================
 
 on R3,
-[Step2]: All IP addresses are set as per the graph and add default route.
+[Step3]: All IP addresses are set as per the graph and add default route.
 ==========================================
 R3(config)#interface ethernet0/0
 R3(config-if)#ip address 22.22.22.6 255.255.255.252
@@ -44,8 +44,8 @@ R3(config-if)#exit
 R3(config)#ip route 0.0.0.0 0.0.0.0 22.22.22.5
 ==========================================
 
-On PC1,
-[Step3]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC1, and try to ping the gateway (192.168.12.1).
+on PC1,
+[Step4]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC1, and try to ping the gateway (192.168.12.1).
 ==========================================
 PC1(config)#no ip routing
 
@@ -57,8 +57,8 @@ PC1(config-if)#exit
 PC1(config)#ip default-gateway 192.168.12.1
 ==========================================
 
-On PC2,
-[Step4]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC2, and try to ping the gateway (192.168.21.1).
+on PC2,
+[Step5]: Disable the routing table, configure the IP address on Ethernet0/0, set the IP gateway on PC2, and try to ping the gateway (192.168.21.1).
 ==========================================
 PC2(config)#no ip routing
 
@@ -70,8 +70,8 @@ PC2(config-if)#exit
 PC(config)#ip default-gateway 192.168.21.1
 ==========================================
 
-on R1
-[Step5]: Configure IPSec VPN Tunnel (Site to Site) on R1
+on R1,
+[Step6]: Configure IPSec VPN Tunnel (Site to Site) on R1
 ==========================================
 R1(config)#crypto isakmp policy 10								<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
 R1(config-isakmp)#encryption 3des
@@ -100,8 +100,8 @@ R1(config-if)#exit
 *Dec 29 11:15:23.206: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON					<-- As soon as we apply crypto map on the interface, we receive a message from the router  that confirms isakmp is on: “ISAKMP is ON”.
 ==========================================
 
-on R3
-[Step5]: Configure IPSec VPN Tunnel (Site to Site) on R3
+on R3,
+[Step7]: Configure IPSec VPN Tunnel (Site to Site) on R3
 ==========================================
 R3(config)#crypto isakmp policy 10								<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->			
 R3(config-isakmp)#encryption 3des
