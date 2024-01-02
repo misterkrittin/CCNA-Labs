@@ -129,6 +129,7 @@ R3(config-if)#exit
 *Dec 29 11:23:40.171: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON								<-- As soon as we apply crypto map on the interface, we receive a message from the router  that confirms isakmp is on: “ISAKMP is ON”.
 ==========================================
 
+on R1 & R3
 [Step8]: Verifying The IPSec VPN Tunnel
 ==========================================
 R1#show crypto session 
