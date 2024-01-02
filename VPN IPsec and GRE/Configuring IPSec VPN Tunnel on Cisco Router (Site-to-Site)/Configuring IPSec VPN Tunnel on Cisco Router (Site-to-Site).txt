@@ -73,60 +73,60 @@ PC(config)#ip default-gateway 192.168.21.1
 on R1,
 [Step6]: Configure IPSec VPN Tunnel (Site to Site) on R1
 ==========================================
-R1(config)#crypto isakmp policy 10														<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
+R1(config)#crypto isakmp policy 10					    		<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
 R1(config-isakmp)#encryption aes 256
 R1(config-isakmp)#hash sha256
 R1(config-isakmp)#authentication pre-share 
 R1(config-isakmp)#exit
 
-R1(config)#crypto isakmp key cisco123 address 22.22.22.6 								<-- [Step2]: Define a pre shared key for authentication with our peer (R3 router) -->
+R1(config)#crypto isakmp key cisco123 address 22.22.22.6 				<-- [Step2]: Define a pre shared key for authentication with our peer (R3 router) -->
 
-R1(config)#crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac         			<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
+R1(config)#crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac         		<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
 R1(cfg-crypto-trans)#exit
 
 
-R1(config)#access-list 100 permit ip 192.168.12.0 0.0.0.255 192.168.21.0 0.0.0.255		<-- [Step4]: Creating Extended ACL (source network to destination network) -->
+R1(config)#access-list 100 permit ip 192.168.12.0 0.0.0.255 192.168.21.0 0.0.0.255	<-- [Step4]: Creating Extended ACL (source network to destination network) -->
 
-R1(config)#crypto map AESMAP 10 ipsec-isakmp											<-- [Step5]: Create Crypto Map -->
+R1(config)#crypto map AESMAP 10 ipsec-isakmp						<-- [Step5]: Create Crypto Map -->
 R1(config-crypto-map)#set peer 22.22.22.6 
 R1(config-crypto-map)#set transform-set TS
 R1(config-crypto-map)#match address 100
 R1(config-crypto-map)#exit
 
-R1(config)#interface ethernet0/0														<-- [Step6]: Apply Crypto Map To The Public Interface -->
+R1(config)#interface ethernet0/0							<-- [Step6]: Apply Crypto Map To The Public Interface -->
 R1(config-if)#crypto map AESMAP
 R1(config-if)#exit
 
-*Dec 29 11:15:23.206: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON								<-- As soon as we apply crypto map on the interface, we receive a message from the router  that confirms isakmp is on: “ISAKMP is ON”.
+*Dec 29 11:15:23.206: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON				<-- As soon as we apply crypto map on the interface, we receive a message from the router  that confirms isakmp is on: “ISAKMP is ON”.
 ==========================================
 
 on R3,
 [Step7]: Configure IPSec VPN Tunnel (Site to Site) on R3
 ==========================================
-R3(config)#crypto isakmp policy 10														<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->			
+R3(config)#crypto isakmp policy 10							<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->	
 R3(config-isakmp)#encryption aes 256
 R3(config-isakmp)#hash sha256 
 R3(config-isakmp)#authentication pre-share 
 R3(config-isakmp)#exit
 
-R3(config)#crypto isakmp key cisco123 address 11.11.11.1								<-- [Step2]: Define a pre shared key for authentication with our peer (R1 router) -->
+R3(config)#crypto isakmp key cisco123 address 11.11.11.1				<-- [Step2]: Define a pre shared key for authentication with our peer (R1 router) -->
 
-R3(config)#crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac 					<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
+R3(config)#crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac 			<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
 R3(cfg-crypto-trans)#exit
 
-R3(config)#access-list 100 permit ip 192.168.21.0 0.0.0.255 192.168.12.0 0.0.0.255		<-- [Step4]: Creating Extended ACL (source network to destination network) -->
+R3(config)#access-list 100 permit ip 192.168.21.0 0.0.0.255 192.168.12.0 0.0.0.255	<-- [Step4]: Creating Extended ACL (source network to destination network) -->
 
-R3(config)#crypto map AESMAP 10 ipsec-isakmp											<-- [Step5]: Create Crypto Map -->
+R3(config)#crypto map AESMAP 10 ipsec-isakmp						<-- [Step5]: Create Crypto Map -->
 R3(config-crypto-map)#set peer 11.11.11.1
 R3(config-crypto-map)#set transform-set TS
 R3(config-crypto-map)#match address 100
 R3(config-crypto-map)#exit
 
-R3(config)#interface ethernet0/0														<-- [Step6]: Apply Crypto Map To The Public Interface -->		
+R3(config)#interface ethernet0/0							<-- [Step6]: Apply Crypto Map To The Public Interface -->		
 R3(config-if)#crypto map AESMAP 
 R3(config-if)#exit
 
-*Dec 29 11:23:40.171: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON								<-- As soon as we apply crypto map on the interface, we receive a message from the router  that confirms isakmp is on: “ISAKMP is ON”.
+*Dec 29 11:23:40.171: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON				<-- As soon as we apply crypto map on the interface, we receive a message from the router  that confirms isakmp is on: “ISAKMP is ON”.
 ==========================================
 
 on R1 & R3
