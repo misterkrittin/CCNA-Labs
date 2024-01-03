@@ -109,26 +109,23 @@ R3(config)#ip route 192.168.12.0 255.255.255.0 172.16.0.1
 on R1,
 [Step9]: Configuring IPSec Encryption For GRE Tunnel (GRE Over IPSec)
 ==========================================
-R1(config)#crypto isakmp policy 1						<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
-R1(config-isakmp)#encryption 3des
-R1(config-isakmp)#hash md5
+R1(config)#crypto isakmp policy 10							<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
+R1(config-isakmp)#encryption aes 256
+R1(config-isakmp)#hash sha256
 R1(config-isakmp)#authentication pre-share
-R1(config-isakmp)#group 2
-R1(config-isakmp)#lifetime 86400
+R1(config-isakmp)#group 5
 R1(config-isakmp)#exit
 
-R1(config)#crypto isakmp key Passw0rd@123 address 22.22.22.6			<-- [Step2]: Define a pre shared key for authentication with our peer (R3 router) -->
+R1(config)#crypto isakmp key cisco123 address 22.22.22.6				<-- [Step2]: Define a pre shared key for authentication with our peer (R3 router) -->
 
-R1(config)#crypto ipsec transform-set TS esp-3des esp-md5-hmac			<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
-R1(cfg-crypto-trans)#mode transport 
+R1(config)#crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac			<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
 R1(cfg-crypto-trans)#exit
 
-R1(config)#crypto ipsec profile protect-gre					<-- [Step4]: Create an IPSec profile to connect the previously defined ISAKMP and IPSec configuration together -->
-R1(ipsec-profile)#set security-association lifetime seconds 86400
+R1(config)#crypto ipsec profile protect-gre						<-- [Step4]: Create an IPSec profile to connect the previously defined ISAKMP and IPSec configuration together -->
 R1(ipsec-profile)#set transform-set TS
 R1(ipsec-profile)#exit
 
-R1(config)#interface tunnel 0							<-- [Step5]: Apply the IPSec encryption to the Tunnel interface
+R1(config)#interface tunnel 0								<-- [Step5]: Apply the IPSec encryption to the Tunnel interface
 R1(config-if)#tunnel protection ipsec profile protect-gre
 R1(config-if)#exit
 
@@ -138,26 +135,23 @@ R1(config-if)#exit
 on R3,
 [Step10]: Configuring IPSec Encryption For GRE Tunnel (GRE Over IPSec)
 ==========================================
-R3(config)#crypto isakmp policy 1						<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
-R3(config-isakmp)#encryption 3des
-R3(config-isakmp)#hash md5
+R3(config)#crypto isakmp policy 10							<-- [Step1]: Configure ISAKMP (IKE) - (ISAKMP Phase 1) -->
+R3(config-isakmp)#encryption aes 256
+R3(config-isakmp)#hash sha256
 R3(config-isakmp)#authentication pre-share 
-R3(config-isakmp)#group 2
-R3(config-isakmp)#lifetime 86400
+R3(config-isakmp)#group 5
 R3(config-isakmp)#exit
 
-R3(config)#crypto isakmp key Passw0rd@123 address 11.11.11.1			<-- [Step2]: Define a pre shared key for authentication with our peer (R1 router) -->
+R3(config)#crypto isakmp key cisco123 address 11.11.11.1				<-- [Step2]: Define a pre shared key for authentication with our peer (R1 router) -->
 
-R3(config)#crypto ipsec transform-set TS esp-3des esp-md5-hmac 			<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
-R3(cfg-crypto-trans)#mode transport 
+R3(config)#crypto ipsec transform-set TS esp-aes 256 esp-sha256-hmac 			<-- [Step3]: Create IPSec Transform (ISAKMP Phase 2 Policy) -->
 R3(cfg-crypto-trans)#exit
 
-R3(config)#crypto ipsec profile protect-gre					<-- [Step4]: Create an IPSec profile to connect the previously defined ISAKMP and IPSec configuration together -->
-R3(ipsec-profile)#set security-association lifetime seconds 86400
+R3(config)#crypto ipsec profile protect-gre						<-- [Step4]: Create an IPSec profile to connect the previously defined ISAKMP and IPSec configuration together -->
 R3(ipsec-profile)#set transform-set TS
 R3(ipsec-profile)#exit
 
-R3(config)#interface tunnel 0							<-- [Step5]: Apply the IPSec encryption to the Tunnel interface
+R3(config)#interface tunnel 0								<-- [Step5]: Apply the IPSec encryption to the Tunnel interface
 R3(config-if)#tunnel protection ipsec profile protect-gre
 R3(config-if)#exit
 
@@ -166,24 +160,24 @@ R3(config-if)#exit
 
 >>>>> Testing <<<<<
 ==========================================
-R1#ping 192.168.21.1
+PC1#ping 192.168.21.1
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 192.168.21.1, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/5 ms
-R1#ping 192.168.21.2
+PC1#ping 192.168.21.2
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 192.168.21.2, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/6 ms
 
 
-R3#ping 192.168.12.1
+PC2#ping 192.168.12.1
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 192.168.12.1, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/5 ms
-R3#ping 192.168.12.2
+PC2#ping 192.168.12.2
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
 !!!!!
@@ -193,25 +187,13 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 5/5/6 ms
 on R1 & R3,
 [Step11]: Verifying The GRE Over IPSec Tunnel
 ==========================================
-R1#show crypto session 
-Crypto session current status
+R1#show crypto isakmp sa
+R1#show crypto ipsec sa
+R1#show interfaces tunnel 0
+R1#show crypto session
 
-Interface: Tunnel0
-Session status: UP-ACTIVE     
-Peer: 22.22.22.6 port 500 
-  Session ID: 0  
-  IKEv1 SA: local 11.11.11.1/500 remote 22.22.22.6/500 Active 
-  IPSEC FLOW: permit 47 host 11.11.11.1 host 22.22.22.6 
-        Active SAs: 2, origin: crypto map
-
-R3#show crypto session 
-Crypto session current status
-
-Interface: Tunnel0
-Session status: UP-ACTIVE     
-Peer: 11.11.11.1 port 500 
-  Session ID: 0  
-  IKEv1 SA: local 22.22.22.6/500 remote 11.11.11.1/500 Active 
-  IPSEC FLOW: permit 47 host 22.22.22.6 host 11.11.11.1 
-        Active SAs: 2, origin: crypto map
+R3#show crypto isakmp sa
+R3#show crypto ipsec sa
+R3#show interfaces tunnel 0
+R3#show crypto session
 ==========================================
