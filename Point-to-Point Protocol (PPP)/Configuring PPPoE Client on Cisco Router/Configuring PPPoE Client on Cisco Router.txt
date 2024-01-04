@@ -1,0 +1,144 @@
+on R1,
+[Step1]: Configure PPPoE client and test if R1 can connect to the Internet.
+=========================================
+R1(config)#interface ethernet0/0
+R1(config-if)#no ip address
+R1(config-if)#no shutdown
+R1(config-if)#pppoe enable group global
+R1(config-if)#pppoe-client dial-pool-number 1
+R1(config-if)#exit
+
+R1(config)#interface dialer 1
+R1(config-if)#mtu 1480									<-- You can inquire about the MTU values from your Internet service provider.
+R1(config-if)#ip address negotiated
+R1(config-if)#encapsulation ppp
+R1(config-if)#ip tcp adjust-mss 1440							<-- You can inquire about the MSS values from your Internet service provider.
+R1(config-if)#dialer pool 1
+R1(config-if)#dialer-group 1
+R1(config-if)#ppp pap sent-username fiber123@fttxhome password fttxhome			<-- You can inquire about your username and password from your internet service provider.
+R1(config-if)#exit
+
+R1(config)#ip route 0.0.0.0 0.0.0.0 dialer 1						<-- Create Default Route to reach the internet.
+
+R1(config)#ip name-server 1.1.1.1 1.0.0.1						<-- Assign Public DNS server to R1.
+R1(config)#exit
+
+R1#ping 8.8.8.8										<-- R1 pings a Public IP Address directly to test if R1 can connect to the Internet.
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 8.8.8.8, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 24/24/25 ms
+
+R1#ping www.youtube.com									<-- R1 pings www.facebook.com to check if the DNS is working.
+Translating "www.youtube.com"...domain server (1.1.1.1) [OK]
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.217.194.190, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 28/28/29 ms
+============================================
+
+on R1,
+[Step2]: Configure LAN Network (DHCP Server and NAT).
+============================================
+R1(config)#interface ethernet0/1							<-- Configure LAN Gateway Address on ethernet0/1 and enable this interface.
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#ip dhcp pool LAN								<-- Configure the DHCP Server.
+R1(dhcp-config)#domain-name cisco.lab
+R1(dhcp-config)#network 192.168.12.0 /24
+R1(dhcp-config)#default-router 192.168.12.1
+R1(dhcp-config)#dns-server 1.1.1.1 1.0.0.1
+R1(dhcp-config)#lease 1
+R1(dhcp-config)#exit
+R1(config)#ip dhcp excluded-address 192.168.12.1 192.168.12.10
+
+R1(config)#access-list 1 permit 192.168.12.0 0.0.0.255					<-- Create an access-list to classify the hosts that need to be natted.
+R1(config)#ip nat inside source list 1 interface dialer 1 overload			<-- Configure the NAT to have access list 1 as inside. dialer 1 as outside with overload.
+
+R1(config)#interface dialer 1								<-- Apply the NAT on the outside interfaces of R1.
+R1(config-if)#ip nat outside 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1							<-- Apply the NAT on the inside interfaces of R1.
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+============================================
+
+>>>>> Testing <<<<<
+on PC1,
+============================================
+PC1> dhcp										<-- PC1 requests an IP Address from the DHCP server.
+DORA IP 192.168.12.11/24 GW 192.168.12.1
+
+PC1> show ip										
+
+NAME        : VPCS[1]
+IP/MASK     : 192.168.12.11/24
+GATEWAY     : 192.168.12.1
+DNS         : 1.1.1.1  1.0.0.1
+DHCP SERVER : 192.168.12.1
+DHCP LEASE  : 86395, 86400/43200/75600
+DOMAIN NAME : cisco.lab
+MAC         : 00:50:79:66:68:04
+LPORT       : 20000
+RHOST:PORT  : 127.0.0.1:30000
+MTU         : 1500
+
+PC1> ping 9.9.9.9									<-- PC1 pings directly to the Public IP address.
+
+84 bytes from 9.9.9.9 icmp_seq=1 ttl=52 time=30.888 ms
+84 bytes from 9.9.9.9 icmp_seq=2 ttl=52 time=31.823 ms
+84 bytes from 9.9.9.9 icmp_seq=3 ttl=52 time=30.781 ms
+84 bytes from 9.9.9.9 icmp_seq=4 ttl=52 time=30.166 ms
+84 bytes from 9.9.9.9 icmp_seq=5 ttl=52 time=30.745 ms
+
+PC1> ping www.youtube.com								<-- PC1 pings www.facebook.com to check if the DNS is working.
+www.youtube.com resolved to youtube-ui.l.google.com(142.251.12.91)
+
+84 bytes from 142.251.12.91 icmp_seq=1 ttl=52 time=30.522 ms
+84 bytes from 142.251.12.91 icmp_seq=2 ttl=52 time=30.566 ms
+84 bytes from 142.251.12.91 icmp_seq=3 ttl=52 time=30.543 ms
+84 bytes from 142.251.12.91 icmp_seq=4 ttl=52 time=30.786 ms
+84 bytes from 142.251.12.91 icmp_seq=5 ttl=52 time=30.805 ms
+============================================
+
+>>>>> Testing <<<<<
+on PC2,
+============================================
+PC2> dhcp										<-- PC2 requests an IP Address from the DHCP server.
+DORA IP 192.168.12.12/24 GW 192.168.12.1
+
+PC2> show ip
+
+NAME        : VPCS[1]
+IP/MASK     : 192.168.12.12/24
+GATEWAY     : 192.168.12.1
+DNS         : 1.1.1.1  1.0.0.1
+DHCP SERVER : 192.168.12.1
+DHCP LEASE  : 86397, 86400/43200/75600
+DOMAIN NAME : cisco.lab
+MAC         : 00:50:79:66:68:05
+LPORT       : 20000
+RHOST:PORT  : 127.0.0.1:30000
+MTU         : 1500
+
+PC2> ping 8.8.8.8								   	<-- PC2 pings directly to the Public IP address.
+
+84 bytes from 8.8.8.8 icmp_seq=1 ttl=113 time=25.055 ms
+84 bytes from 8.8.8.8 icmp_seq=2 ttl=113 time=25.034 ms
+84 bytes from 8.8.8.8 icmp_seq=3 ttl=113 time=26.489 ms
+84 bytes from 8.8.8.8 icmp_seq=4 ttl=113 time=25.315 ms
+84 bytes from 8.8.8.8 icmp_seq=5 ttl=113 time=25.445 ms
+
+PC2> ping www.facebook.com								<-- PC2 pings www.facebook.com to check if the DNS is working.
+www.facebook.com resolved to star-mini.c10r.facebook.com(157.240.7.35)
+
+84 bytes from 157.240.7.35 icmp_seq=1 ttl=49 time=28.647 ms
+84 bytes from 157.240.7.35 icmp_seq=2 ttl=49 time=28.373 ms
+84 bytes from 157.240.7.35 icmp_seq=3 ttl=49 time=28.488 ms
+84 bytes from 157.240.7.35 icmp_seq=4 ttl=49 time=28.627 ms
+84 bytes from 157.240.7.35 icmp_seq=5 ttl=49 time=28.851 ms
+============================================
