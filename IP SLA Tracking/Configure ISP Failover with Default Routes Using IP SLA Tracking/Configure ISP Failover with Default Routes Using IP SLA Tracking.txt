@@ -1,0 +1,144 @@
+ISP1(config)#interface ethernet0/0
+ISP1(config-if)#ip address 10.254.4.70 255.255.255.0
+ISP1(config-if)#no shutdown 
+ISP1(config-if)#exit
+
+ISP1(config)#interface ethernet0/1
+ISP1(config-if)#ip address 172.16.100.1 255.255.255.0
+ISP1(config-if)#no shutdown
+ISP1(config-if)#exit
+
+ISP1(config)#ip route 0.0.0.0 0.0.0.0 10.254.4.254
+
+ISP1#ping 1.1.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 3/3/4 ms
+
+
+ISP1(config)#access-list 1 permit 172.16.100.0 0.0.0.255
+ISP1(config)#ip nat inside source list 1 interface ethernet0/0 overload
+
+ISP1(config)#interface ethernet0/0
+ISP1(config-if)#ip nat outside 
+ISP1(config-if)#exit
+
+ISP1(config)#interface ethernet0/1
+ISP1(config-if)#ip nat inside 
+ISP1(config-if)#exit
+
+
+===================================================================
+
+ISP2(config)#interface ethernet0/0
+ISP2(config-if)#ip address 10.254.4.71 255.255.255.0
+ISP2(config-if)#no shutdown
+ISP2(config-if)#exit
+
+ISP2(config)#interface ethernet0/1
+ISP2(config-if)#ip address 172.16.200.1 255.255.255.0
+ISP2(config-if)#no shutdown
+ISP2(config-if)#exit 
+
+ISP2(config)#ip route 0.0.0.0 0.0.0.0 10.254.4.254
+
+ISP2#ping 1.1.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 3/4/5 ms
+
+
+ISP2(config)#access-list 1 permit 172.16.200.0 0.0.0.255 
+ISP2(config)#ip nat inside source list 1 interface ethernet0/0 overload
+
+ISP2(config)#interface ethernet0/0
+ISP2(config-if)#ip nat outside 
+ISP2(config-if)#exit
+
+ISP2(config)#interface ethernet0/1
+ISP2(config-if)#ip nat inside 
+ISP2(config-if)#exit
+===================================================================
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 172.16.100.2 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1
+R1(config-if)#ip address 172.16.200.2 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/2
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R1(config)#ip sla 1 
+R1(config-ip-sla)#icmp-echo 172.16.100.1 source-ip 172.16.100.2
+R1(config-ip-sla-echo)#timeout 5000
+R1(config-ip-sla-echo)#threshold 5000
+R1(config-ip-sla-echo)#frequency 60
+R1(config-ip-sla-echo)#exit
+
+R1(config)#ip sla schedule 1 life forever start-time now
+
+R1(config)#track 8 ip sla 1 reachability 
+R1(config-track)#exit
+
+R1(config)#ip route 0.0.0.0 0.0.0.0 172.16.100.1 track 8
+R1(config)#ip route 0.0.0.0 0.0.0.0 172.16.200.1 10
+
+
+R1(config)#ip access-list extended 101
+R1(config-ext-nacl)#permit ip 192.168.12.0 0.0.0.255 any
+R1(config-ext-nacl)#exit
+
+R1(config)#route-map NAT_ISP1 permit 10
+R1(config-route-map)#match ip address 101
+R1(config-route-map)#match interface ethernet0/0
+R1(config-route-map)#exit
+
+R1(config)#route-map NAT_ISP2 permit 10
+R1(config-route-map)#match ip address 101
+R1(config-route-map)#match interface ethernet0/1
+R1(config-route-map)#exit
+
+R1(config)#interface ethernet0/0
+R1(config-if)#ip nat outside 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/1
+R1(config-if)#ip nat outside 
+R1(config-if)#exit
+
+R1(config)#interface ethernet0/2
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+
+R1(config)#ip nat inside source route-map NAT_ISP1 interface ethernet0/0 overload
+R1(config)#ip nat inside source route-map NAT_ISP2 interface ethernet0/1 overload
+===================================================================
+
+PC1(config)#no ip routing
+
+PC1(config)#interface ethernet0/0
+PC1(config-if)#ip address 192.168.12.254 255.255.255.0
+PC1(config-if)#no shutdown 
+PC1(config-if)#exit
+
+PC1(config)#ip default-gateway 192.168.12.1
+===================================================================
+
+PC2(config)#no ip routing 
+
+PC2(config)#interface ethernet0/0
+PC2(config-if)#ip address 192.168.12.253 255.255.255.0
+PC2(config-if)#no shutdown 
+PC2(config-if)#exit
+
+PC2(config)#ip default-gateway 192.168.12.1
+===================================================================
