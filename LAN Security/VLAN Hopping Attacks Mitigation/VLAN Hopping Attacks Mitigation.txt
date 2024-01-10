@@ -167,7 +167,7 @@ Protected: false
 Appliance trust: none
 ######################################################
 
-[Step6]: Make ethernet0/1 as trunk port, Input "switchport nonegotiate" command and show details this interface
+[Step6]: Make ethernet3/3 as trunk port, Input "switchport nonegotiate" command and show details this interface
 ######################################################
 SW1(config)#interface ethernet3/3
 SW1(config-if)#switchport trunk encapsulation dot1q 
@@ -339,7 +339,7 @@ Protected: false
 Appliance trust: none
 ######################################################
 
-[Step5]: Make ethernet0/1 as trunk port, Input "switchport nonegotiate" command and show details this interface
+[Step5]: Make ethernet3/3 as trunk port, Input "switchport nonegotiate" command and show details this interface
 ######################################################
 SW2(config)#interface ethernet3/3
 SW2(config-if)#switchport trunk encapsulation dot1q 
