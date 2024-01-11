@@ -1,0 +1,173 @@
+on R1 & R2,
+[Step1]: All IP Addresses are set as per the graph. Try to ping from R1 to R2, is it successful?
+===================================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+
+R1#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+===================================================
+
+on SW,
+[Step2]: Check in which VLAN's are the ports ethernet0/0 and ethernet0/1
+===================================================
+SW#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/0, Et0/1, Et0/2, Et0/3	<-- Ethernet0/0 and Ethernet0/1 are in VLAN1 by default.
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+===================================================
+
+on SW,
+[Step3]: Create VLAN2 and put ethernet0/0 inside of it (hint: ethernet0/0 should be an access port)
+===================================================
+SW(config)#vlan 2
+SW(config-vlan)#name Sales
+SW(config-vlan)#exit 
+
+SW(config)#interface ethernet0/0
+SW(config-if)#switchport mode access
+SW(config-if)#switchport access vlan 2
+SW(config-if)#no shutdown 
+SW(config-if)#exit
+
+SW#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/1, Et0/2, Et0/3
+2    Sales                            active    Et0/0					<-- Ethernet0/0 has been moved to VLAN2.
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+2    enet  100002     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+===================================================
+
+on SW,
+[Step4]: Create VLAN3 and put ethernet0/1 inside of it (hint: ethernet0/1 should be an access port)
+===================================================
+SW(config)#vlan 3
+SW(config-vlan)#name Marketing
+SW(config-vlan)#exit
+
+SW(config)#interface ethernet0/1
+SW(config-if)#switchport mode access
+SW(config-if)#switchport access vlan 3
+SW(config-if)#no shutdown 
+SW(config-if)#exit
+
+SW#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/2, Et0/3
+2    Sales                            active    Et0/0
+3    Marketing                        active    Et0/1					<-- Ethernet0/1 has been moved to VLAN3.
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+2    enet  100002     1500  -      -      -        -    -        0      0   
+3    enet  100003     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+===================================================
+
+on R1,
+[Step5]: Try to ping from R1 to R2, is it sucessful? Why not? (Ethernet0/0 and ethernet0/1 are not in the same VLAN.)
+===================================================
+R1#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+
+===================================================
+
+on SW,
+[Step6]: Put ethernet0/1 in VLAN2 and try to ping now from R1 to R2, is it working?
+===================================================
+SW(config)#interface ethernet0/1
+SW(config-if)#switchport access vlan 2
+SW(config-if)#exit
+
+SW#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/2, Et0/3
+2    Sales                            active    Et0/0, Et0/1				<-- Ethernet0/0 and Ethernet0/1 are in the same VLAN2.
+3    Marketing                        active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+2    enet  100002     1500  -      -      -        -    -        0      0   
+3    enet  100003     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+R1#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+===================================================
