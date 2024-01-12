@@ -1,0 +1,36 @@
+terminal length 0
+show clock 
+show version 
+show inventory 
+show running-config  
+show ip interface brief  
+show interface 
+show interface trunk
+show interface description
+show interface status
+show interface counters errors
+show interface summary
+show ip arp
+show mac address-table
+show ip route 
+show ip route summary
+show vlan
+show vlan brief
+show vtp status
+show vtp password
+show vtp version 
+show cdp neighbor 
+show cdp neighbor detail 
+show cdp e * p
+show etherchannel summary
+show spanning-tree
+show spanning-tree blocked ports
+show spanning-tree summary
+show ntp status
+
+dir   
+terminal length 24
+
+
+
+
