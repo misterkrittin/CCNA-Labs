@@ -1,0 +1,217 @@
+on R1 & R2,
+[Step1]: All IP Addresses are set as per the graph.
+===================================================
+R1(config)#interface ethernet0/0
+R1(config-if)#ip address 192.168.12.1 255.255.255.0
+R1(config-if)#no shutdown 
+R1(config-if)#exit
+
+R2(config)#interface ethernet0/0
+R2(config-if)#ip address 192.168.12.2 255.255.255.0
+R2(config-if)#no shutdown 
+R2(config-if)#exit
+===================================================
+
+on SW1 & SW2,
+[Step2]: Configure VLAN 40 on SW1 and SW2
+===================================================
+SW1(config)#vlan 40
+SW1(config-vlan)#name Sales
+SW1(config-vlan)#exit
+
+SW2(config)#vlan 40
+SW2(config-vlan)#name Sales
+SW2(config-vlan)#exit
+===================================================
+
+on SW1 & SW2,
+[Step3]: Put ethernet0/1 of SW1 and of SW2 in VLAN 40
+===================================================
+SW1(config)#interface ethernet0/1
+SW1(config-if)#switchport mode access
+SW1(config-if)#switchport access vlan 40
+SW1(config-if)#no shutdown 
+SW1(config-if)#exit
+
+
+SW2(config)#interface ethernet0/1
+SW2(config-if)#switchport mode access
+SW2(config-if)#switchport access vlan 40
+SW2(config-if)#no shutdown 
+SW2(config-if)#exit
+===================================================
+
+on SW1 & SW2,
+[Step4]: Configure ethernet0/0 of SW1 and SW2 to be trunk ports
+===================================================
+SW1(config)#interface ethernet0/0
+SW1(config-if)#switchport trunk encapsulation dot1q
+SW1(config-if)#switchport mode trunk
+SW1(config-if)#switchport trunk allowed vlan 40
+SW1(config-if)#no shutdown 
+SW1(config-if)#exit
+
+SW2(config)#interface ethernet0/0
+SW2(config-if)#switchport trunk encapsulation dot1q
+SW2(config-if)#switchport mode trunk
+SW2(config-if)#switchport trunk allowed vlan 40
+SW2(config-if)#no shutdown 
+SW2(config-if)#exit
+===================================================
+
+on SW1 & SW2,
+[Step5]: Check if the ports are correctly in trunk and access ports
+===================================================
+SW1#show interfaces ethernet0/0 switchport
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: trunk				<--
+Operational Mode: trunk					<--
+Administrative Trunking Encapsulation: dot1q		<--
+Operational Trunking Encapsulation: dot1q		<--
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 40
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+
+Protected: false
+Appliance trust: none
+
+
+SW2#show interfaces ethernet0/0 switchport 
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: trunk				<--
+Operational Mode: trunk					<--
+Administrative Trunking Encapsulation: dot1q		<--
+Operational Trunking Encapsulation: dot1q		<--
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 40
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+
+Protected: false
+Appliance trust: none
+
+SW1#show interfaces trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      1
+
+Port        Vlans allowed on trunk
+Et0/0       40
+
+Port        Vlans allowed and active in management domain
+Et0/0       40
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       40
+
+SW2#show interfaces trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      1
+
+Port        Vlans allowed on trunk
+Et0/0       40
+
+Port        Vlans allowed and active in management domain
+Et0/0       40
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       40
+
+SW1#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/2, Et0/3
+40   Sales                            active    Et0/1					<--
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+
+SW2#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/2, Et0/3
+40   Sales                            active    Et0/1					<--
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+===================================================
+
+on R1,
+[Step6]: Ping from R1 to R2, is it successful?
+===================================================
+PC1#ping 192.168.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+===================================================
