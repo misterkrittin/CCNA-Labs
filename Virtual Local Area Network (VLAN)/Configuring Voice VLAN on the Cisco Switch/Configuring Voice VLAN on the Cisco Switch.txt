@@ -104,13 +104,13 @@ Appliance trust: none
 SW#show interfaces ethernet0/0 trunk 
 
 Port        Mode             Encapsulation  Status        Native vlan
-Et0/0       off              negotiate      not-trunking  1		<-- ethernet0/0 is not-trunking.
+Et0/0       off              negotiate      not-trunking  1		<-- We can verify the status of a trunk port even if it appears as not-trunking. In reality, it is a trunk because two VLANs are actively being used on the same interface (ethernet0/0).
 
 Port        Vlans allowed on trunk
-Et0/0       10,20
+Et0/0       10,20							<--
 
 Port        Vlans allowed and active in management domain
-Et0/0       10,20
+Et0/0       10,20							<--
 
 Port        Vlans in spanning tree forwarding state and not pruned
 Et0/0       10,20
