@@ -1,0 +1,118 @@
+on SW,
+[Step1]: Configure VLAN 10 for the PC and VLAN 20 for the Phone
+============================================
+SW(config)#vlan 10
+SW(config-vlan)#name PC
+SW(config-vlan)#exit
+
+SW(config)#vlan 20
+SW(config-vlan)#name Phone
+SW(config-vlan)#exit
+
+SW#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/0, Et0/1, Et0/2, Et0/3
+10   PC                               active    
+20   Phone                            active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+          
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+============================================
+
+on SW,
+[Step2]: Configure the ethernet0/0 port of SW as access and put it inside VLAN10
+============================================
+SW(config)#interface ethernet0/0
+SW(config-if)#switchport mode access 
+SW(config-if)#switchport access vlan 10
+SW(config-if)#no shutdown
+SW(config-if)#exit
+============================================
+
+on SW,
+[Step3]: Configure the ethernet0/0 port of SW as Voice VLAN for the VOIPVLAN
+============================================
+SW(config)#interface ethernet0/0
+SW(config-if)#switchport voice vlan 20
+SW(config-if)#exit
+============================================
+
+on SW,
+[Step4]: Check justify that you have done the right configuration
+============================================
+SW#show running-config interface ethernet0/0
+Building configuration...
+
+Current configuration : 106 bytes
+!
+interface Ethernet0/0
+ switchport access vlan 10
+ switchport mode access
+ switchport voice vlan 20
+end
+
+SW#show interfaces ethernet0/0 switchport 
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: static access
+Operational Mode: static access
+Administrative Trunking Encapsulation: negotiate
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: Off
+Access Mode VLAN: 10 (PC)						<--
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: 20 (Phone)							<--
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+
+Protected: false
+Appliance trust: none
+
+SW#show interfaces ethernet0/0 trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       off              negotiate      not-trunking  1		<-- ethernet0/0 is not-trunking.
+
+Port        Vlans allowed on trunk
+Et0/0       10,20
+
+Port        Vlans allowed and active in management domain
+Et0/0       10,20
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       10,20
+
+============================================
