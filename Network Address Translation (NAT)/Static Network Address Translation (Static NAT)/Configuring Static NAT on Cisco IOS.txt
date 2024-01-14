@@ -1,12 +1,12 @@
 on R1,
 
-[Step1]: Configure Static WAN Address on "ethernet0/1" and enable this interface.
+[Step1]: Configure LAN Gateway Address on "ethernet0/0" and enable this interface.
 ####################################
 R1(config)#interface ethernet0/0
 R1(config-if)#ip address 192.168.12.1 255.255.255.0
 R1(config-if)#no shutdown
 
-[Step2]: Configure LAN Gateway Address on "ethernet0/0" and enable this interface.
+[Step2]: Configure Static WAN Address on "ethernet0/1" and enable this interface.
 ####################################
 R1(config)#interface ethernet0/1
 R1(config-if)#ip address 200.0.0.1 255.0.0.0
