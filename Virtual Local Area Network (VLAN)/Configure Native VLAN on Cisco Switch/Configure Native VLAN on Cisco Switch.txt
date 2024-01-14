@@ -1,0 +1,168 @@
+[Step1]: Configure ethernet0/0 of SW1 and SW2 as trunk ports
+======================================
+SW1(config)#interface ethernet0/0
+SW1(config-if)#switchport trunk encapsulation dot1q
+SW1(config-if)#switchport mode trunk
+SW1(config-if)#no shutdown 
+SW1(config-if)#exit
+
+SW2(config)#interface ethernet0/0
+SW2(config-if)#switchport trunk encapsulation dot1q
+SW2(config-if)#switchport mode trunk
+SW2(config-if)#no shutdown 
+SW2(config-if)#exit
+======================================
+
+[Step2]: Check what is the native VLAN on SW1 and SW2
+======================================
+SW1#show interfaces ethernet0/0 switchport 
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: trunk					<--
+Operational Mode: trunk						<--
+Administrative Trunking Encapsulation: dot1q			<--
+Operational Trunking Encapsulation: dot1q			<--
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+
+Protected: false
+Appliance trust: none
+
+SW1#show interfaces ethernet0/0 trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      1  <--
+
+Port        Vlans allowed on trunk
+Et0/0       1-4094
+
+Port        Vlans allowed and active in management domain
+Et0/0       1
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       1
+
+SW2#show interfaces ethernet0/0 switchport 
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: trunk					<--
+Operational Mode: trunk						<--
+Administrative Trunking Encapsulation: dot1q			<--
+Operational Trunking Encapsulation: dot1q			<--
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+
+Protected: false
+Appliance trust: none
+
+SW2#show interfaces ethernet0/0 trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      1  <--
+
+Port        Vlans allowed on trunk
+Et0/0       1-4094
+
+Port        Vlans allowed and active in management domain
+Et0/0       1
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       1
+======================================
+
+[Step3]: Check the CDP neighbors
+======================================
+SW1#show cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+SW2              Eth 0/0           152             R S I  Linux Uni Eth 0/0
+
+Total cdp entries displayed : 1
+
+SW2#show cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+SW1              Eth 0/0           152             R S I  Linux Uni Eth 0/0
+
+Total cdp entries displayed : 1
+======================================
+
+[Step4]: Change the native VLAN on SW1 to be VLAN 10 and same on SW2
+======================================
+SW1(config)#interface ethernet0/0
+SW1(config-if)#switchport trunk native vlan 10
+SW1(config-if)#exit
+
+SW2(config)#interface ethernet0/0
+SW2(config-if)#switchport trunk native vlan 10
+SW2(config-if)#exit
+======================================
+
+[Step5]: Justify your work if it is done correctly.
+======================================
+SW1#show interfaces ethernet0/0 trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      10  <--
+
+Port        Vlans allowed on trunk
+Et0/0       1-4094
+
+Port        Vlans allowed and active in management domain
+Et0/0       1
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       1
+
+SW2#show interfaces ethernet0/0 trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      10  <--
+
+Port        Vlans allowed on trunk
+Et0/0       1-4094
+
+Port        Vlans allowed and active in management domain
+Et0/0       1
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       1
+======================================
