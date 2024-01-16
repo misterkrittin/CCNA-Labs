@@ -1,0 +1,372 @@
+on SW1, SW2, SW3, SW4 and SW5,
+[Step1]: Configure the Trunk port between switches.
+===========================================
+SW1(config)#interface range ethernet0/0-2
+SW1(config-if-range)#switchport trunk encapsulation dot1q 
+SW1(config-if-range)#switchport mode trunk
+SW1(config-if-range)#no shutdown 
+SW1(config-if-range)#exit
+
+SW2(config)#interface ethernet0/0
+SW2(config-if)#switchport trunk encapsulation dot1q
+SW2(config-if)#no shutdown 
+SW2(config-if)#exit
+
+SW3(config)#interface ethernet0/0
+SW3(config-if)#switchport trunk encapsulation dot1q
+SW3(config-if)#switchport mode trunk
+SW3(config-if)#no shutdown 
+SW3(config-if)#exit
+
+SW4(config)#interface range ethernet0/0-1
+SW4(config-if-range)#switchport trunk encapsulation dot1q
+SW4(config-if-range)#switchport mode trunk
+SW4(config-if-range)#no shutdown 
+SW4(config-if-range)#exit
+
+SW5(config)#interface ethernet0/0
+SW5(config-if)#switchport trunk encapsulation dot1q
+SW5(config-if)#switchport mode trunk
+SW5(config-if)#no shutdown 
+SW5(config-if)#exit
+===========================================
+ 
+on SW1, SW2, SW3, SW4 and SW5,
+[Step2]: Configure the VTP mode, domain, and password for each switch, with the domain and password values being the same.
+===========================================
+SW1(config)#vtp mode server
+SW1(config)#vtp domain cisco			
+SW1(config)#vtp password cisco123		
+
+SW2(config)#vtp mode client			
+SW2(config)#vtp domain cisco			<-- Configure to match SW1.
+SW2(config)#vtp password cisco123		<-- Configure to match SW1.
+
+SW3(config)#vtp mode client
+SW3(config)#vtp domain cisco			<-- Configure to match SW1.
+SW3(config)#vtp password cisco123		<-- Configure to match SW1.
+.
+SW4(config)#vtp mode client			
+SW4(config)#vtp domain cisco			<-- Configure to match SW1.
+SW4(config)#vtp password cisco123		<-- Configure to match SW1.
+
+SW5(config)#vtp mode client
+SW5(config)#vtp domain cisco			<-- Configure to match SW1.
+SW5(config)#vtp password cisco123		<-- Configure to match SW1.
+===========================================
+
+on SW1, SW2, SW3, SW4 and SW5,
+[Step3]: To display the VTP configuration information.
+===========================================
+SW1#show vtp status 
+VTP Version capable             : 1 to 3
+VTP version running             : 1
+VTP Domain Name                 : cisco
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : aabb.cc00.1a00
+Configuration last modified by 0.0.0.0 at 0-0-00 00:00:00
+Local updater ID is 0.0.0.0 (no valid interface found)
+
+Feature VLAN:
+--------------
+VTP Operating Mode                : Server
+Maximum VLANs supported locally   : 1005
+Number of existing VLANs          : 5
+Configuration Revision            : 0
+MD5 digest                        : 0xCD 0x42 0x23 0xEE 0xF3 0x91 0xB0 0x7E 
+                                    0xE6 0x54 0xCE 0x14 0x4A 0x2A 0x9C 0xD1
+
+SW2#show vtp status 
+VTP Version capable             : 1 to 3
+VTP version running             : 1
+VTP Domain Name                 : cisco
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : aabb.cc00.2a00
+Configuration last modified by 0.0.0.0 at 0-0-00 00:00:00
+
+Feature VLAN:
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 1005
+Number of existing VLANs          : 5
+Configuration Revision            : 0
+MD5 digest                        : 0xCD 0x42 0x23 0xEE 0xF3 0x91 0xB0 0x7E 
+                                    0xE6 0x54 0xCE 0x14 0x4A 0x2A 0x9C 0xD1 
+
+SW3#show vtp status 
+VTP Version capable             : 1 to 3
+VTP version running             : 1
+VTP Domain Name                 : cisco
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : aabb.cc00.3a00
+Configuration last modified by 0.0.0.0 at 0-0-00 00:00:00
+
+Feature VLAN:
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 1005
+Number of existing VLANs          : 5
+Configuration Revision            : 0
+MD5 digest                        : 0xCD 0x42 0x23 0xEE 0xF3 0x91 0xB0 0x7E 
+                                    0xE6 0x54 0xCE 0x14 0x4A 0x2A 0x9C 0xD1
+
+SW4#show vtp status 
+VTP Version capable             : 1 to 3
+VTP version running             : 1
+VTP Domain Name                 : cisco
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : aabb.cc00.4a00
+Configuration last modified by 0.0.0.0 at 0-0-00 00:00:00
+
+Feature VLAN:
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 1005
+Number of existing VLANs          : 5
+Configuration Revision            : 0
+MD5 digest                        : 0xCD 0x42 0x23 0xEE 0xF3 0x91 0xB0 0x7E 
+                                    0xE6 0x54 0xCE 0x14 0x4A 0x2A 0x9C 0xD1 
+
+SW5#show vtp status 
+VTP Version capable             : 1 to 3
+VTP version running             : 1
+VTP Domain Name                 : cisco
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : aabb.cc00.5a00
+Configuration last modified by 0.0.0.0 at 0-0-00 00:00:00
+
+Feature VLAN:
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 1005
+Number of existing VLANs          : 5
+Configuration Revision            : 0
+MD5 digest                        : 0xCD 0x42 0x23 0xEE 0xF3 0x91 0xB0 0x7E 
+                                    0xE6 0x54 0xCE 0x14 0x4A 0x2A 0x9C 0xD1 
+===========================================
+
+on SW1,
+[Step4]: Create VLANs on SW1(VTP Server)
+===========================================
+SW1(config)#vlan 10
+SW1(config-vlan)#name Sales
+SW1(config-vlan)#exit
+
+SW1(config)#vlan 20
+SW1(config-vlan)#name Engineer
+SW1(config-vlan)#exit
+
+SW1(config)#vlan 30
+SW1(config-vlan)#name Marketing
+SW1(config-vlan)#exit
+
+SW1(config)#vlan 40
+SW1(config-vlan)#name HR
+SW1(config-vlan)#exit
+
+SW1(config)#vlan 50
+SW1(config-vlan)#name Admin
+SW1(config-vlan)#exit
+===========================================
+
+on SW1,SW2,SW3,SW4 and SW5,
+[Step5]: Verify if SW2, SW3, SW4, and SW5 have automatically created VLANs.
+===========================================
+SW1#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/3
+10   Sales                            active    
+20   Engineer                         active    
+30   Marketing                        active    
+40   HR                               active    
+50   Admin                            active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+30   enet  100030     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+50   enet  100050     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+
+SW2#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/1, Et0/2, Et0/3
+10   Sales                            active    
+20   Engineer                         active    
+30   Marketing                        active    
+40   HR                               active    
+50   Admin                            active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+30   enet  100030     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+50   enet  100050     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    srb      0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+
+SW3#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/1, Et0/2, Et0/3
+10   Sales                            active    
+20   Engineer                         active    
+30   Marketing                        active    
+40   HR                               active    
+50   Admin                            active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+30   enet  100030     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+50   enet  100050     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    srb      0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+
+SW4#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/2, Et0/3
+10   Sales                            active    
+20   Engineer                         active    
+30   Marketing                        active    
+40   HR                               active    
+50   Admin                            active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+30   enet  100030     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+50   enet  100050     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    srb      0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+
+SW5#show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/1, Et0/2, Et0/3
+10   Sales                            active    
+20   Engineer                         active    
+30   Marketing                        active    
+40   HR                               active    
+50   Admin                            active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+20   enet  100020     1500  -      -      -        -    -        0      0   
+30   enet  100030     1500  -      -      -        -    -        0      0   
+40   enet  100040     1500  -      -      -        -    -        0      0   
+50   enet  100050     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    srb      0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+===========================================
+
+on SW1,
+[Step6]: Check the Configuration Revision value on SW1 (VTP Server).
+===========================================
+SW1#show vtp status 
+VTP Version capable             : 1 to 3
+VTP version running             : 1
+VTP Domain Name                 : cisco
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : aabb.cc00.1a00
+Configuration last modified by 0.0.0.0 at 1-16-24 07:12:01
+Local updater ID is 0.0.0.0 (no valid interface found)
+
+Feature VLAN:
+--------------
+VTP Operating Mode                : Server
+Maximum VLANs supported locally   : 1005
+Number of existing VLANs          : 10
+Configuration Revision            : 5						<-- The Configuration Revision value increases when you create or delete VLANs.
+MD5 digest                        : 0x19 0x8E 0xAD 0x52 0x74 0x50 0x29 0xCC 
+                                    0x66 0x70 0x76 0x4F 0xFA 0x11 0xF2 0xFB
+===========================================
+
+on SW1,SW2,SW3,SW4 and SW5,
+[Step7]: To display the VTP statistics.
+===========================================
+SW1#show vtp counters
+SW2#show vtp counters
+SW3#show vtp counters
+SW4#show vtp counters
+SW5#show vtp counters
+===========================================
